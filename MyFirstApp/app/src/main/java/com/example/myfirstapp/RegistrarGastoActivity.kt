@@ -1,9 +1,12 @@
 package com.example.myfirstapp
 
 import android.content.ContentValues
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -11,17 +14,23 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,10 +43,15 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.myfirstapp.ui.theme.MyFirstAppTheme
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
-class RegistrarGastoActivity : AppCompatActivity() {
+
+class RegistrarGastosActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -63,6 +77,12 @@ class RegistrarGastoActivity : AppCompatActivity() {
         //es compartido ??
         //se repetira ?? (cada semana o mes)
 
+        val categorias: MutableList<String> = mutableListOf()
+        val fuentes:    MutableList<String> = mutableListOf()
+
+        obtenerDocumentos("categories", categorias)
+        obtenerDocumentos("sources", fuentes)
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -75,11 +95,34 @@ class RegistrarGastoActivity : AppCompatActivity() {
                     .fillMaxSize()
                     .align(Alignment.Center)
             ) {
-                CategoriaDropdownMenu(categoria = categoria, onValueChanged = { categoria = it })
-                TituloTextField(titulo = titulo, onValueChanged = { titulo = it })
-                MontoTextField(monto = monto, onValueChanged = { monto = it })
-                ObservacionesTextField(observaciones = observaciones, onValueChanged = { observaciones = it })
-                FuenteDropdownMenu(fuente = fuente, onValueChanged = { fuente = it })
+                DropdownMenu(
+                    "Categoría",
+                    categoria,
+                    categorias,
+                    { categoria = it }
+                )
+                TextField(
+                    "Título",
+                    titulo,
+                    { titulo = it }
+                )
+                MontoTextField(
+                    monto = monto,
+                    onValueChanged = { monto = it }
+                )
+                TextField(
+                    "Observaciones",
+                    observaciones,
+                    { observaciones = it }
+                )
+                DropdownMenu(
+                    "Fuente",
+                    fuente,
+                    fuentes,
+                    { fuente = it }
+                )
+
+                //TextField(asunto:String, onValueChange = {})
                 crearGastoButton(
                     categoria       = categoria,
                     titulo          = titulo,
@@ -91,54 +134,101 @@ class RegistrarGastoActivity : AppCompatActivity() {
         }
     }
 
-    @Composable
-    fun CategoriaDropdownMenu(categoria: String, onValueChanged: (String) -> Unit) {
-        val items = listOf("Gastronomia", "Entretenimiento", "Compras")
-
-        val selectedItem = remember { mutableStateOf(categoria) }
-        val expanded = remember { mutableStateOf(false) }
-
-        Column {
-            Text(text = "Elemento seleccionado: ${selectedItem.value}")
-            Spacer(modifier = Modifier.height(16.dp))
-
-            DropdownMenu(
-                expanded = expanded.value,
-                onDismissRequest = { expanded.value = false }
-            ) {
-                items.forEach { item ->
-                    DropdownMenuItem(
-                        onClick = {
-                            selectedItem.value = item
-                            expanded.value = false
-                            onValueChanged(item)
-                        },
-                        text = {
-                            Text(text = item)
-                        }
-                    )
+    fun obtenerDocumentos(nombreColeccion: String, lista: MutableList<String>) {
+        val db = Firebase.firestore
+        db.collection(nombreColeccion)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                for (document in querySnapshot) {
+                    val documentData = document.getString("name")
+                    documentData?.let {
+                        lista.add(it)
+                    }
                 }
             }
+            .addOnFailureListener { exception ->
+                println("Error obteniendo documentos: $exception")
+            }
+    }
 
-            Button(onClick = { expanded.value = !expanded.value }) {
-                Text(text = "Abrir/Cerrar")
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun DropdownMenu(
+        asuntoTextField: String,
+        asunto: String,
+        opciones: List<String>,
+        onValueChanged: (String) -> Unit
+    ) {
+
+        val selectedItem = remember { mutableStateOf(asunto) }
+        var expanded by remember { mutableStateOf(false) }
+
+        Column {
+
+            val isPlaceholderVisible = selectedItem.value.isEmpty()
+            if (isPlaceholderVisible) {
+                Text(
+                    text = "Seleccionar $asuntoTextField",
+                    color = Color.Gray,
+                    modifier = Modifier.padding(vertical = 16.dp)
+                )
+            }
+
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = {
+                    expanded = it
+                }
+            ) {
+                TextField(
+                    value = selectedItem.value,
+                    onValueChange = { },
+                    readOnly = true,
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                    modifier = Modifier.menuAnchor()
+                )
+
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    opciones.forEach { item ->
+                        DropdownMenuItem(
+                            onClick = {
+                                selectedItem.value = item
+                                expanded = false
+                                onValueChanged(item)
+                            },
+                            text = {
+                                Text(text = item)
+                            }
+                        )
+                    }
+                }
             }
         }
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun TituloTextField(titulo: String, onValueChanged: (String) -> Unit) {
+    fun TextField(
+        asuntoTextField: String,
+        asunto: String,
+        onValueChanged: (String) -> Unit
+    ) {
         TextField(
-            value = titulo,
+            value = asunto,
             onValueChange = { newValue -> onValueChanged(newValue) },
-            label = { Text("Título") }
+            label = { Text("$asuntoTextField") }
         )
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun MontoTextField(monto: Double, onValueChanged: (Double) -> Unit) {
+    fun MontoTextField(
+        monto: Double,
+        onValueChanged: (Double) -> Unit
+    ) {
         TextField(
             value = monto.toString(),
             onValueChange = { newValue -> onValueChanged(newValue.toDouble()) },
@@ -147,58 +237,13 @@ class RegistrarGastoActivity : AppCompatActivity() {
         )
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    fun ObservacionesTextField(observaciones: String, onValueChanged: (String) -> Unit) {
-        TextField(
-            value = observaciones,
-            onValueChange = { newValue -> onValueChanged(newValue) },
-            label = { Text("Observaciones") }
-        )
-    }
-
-    @Composable
-    fun FuenteDropdownMenu(fuente: String, onValueChanged: (String) -> Unit) {
-        val items = listOf("Tarjeta de Crédito", "Tarjeta de Débito", "Efectivo")
-
-        val selectedItem = remember { mutableStateOf(fuente) }
-        val expanded = remember { mutableStateOf(false) }
-
-        Column {
-            Text(text = "Elemento seleccionado: ${selectedItem.value}")
-            Spacer(modifier = Modifier.height(16.dp))
-
-            DropdownMenu(
-                expanded = expanded.value,
-                onDismissRequest = { expanded.value = false }
-            ) {
-                items.forEach { item ->
-                    DropdownMenuItem(
-                        onClick = {
-                            selectedItem.value = item
-                            expanded.value = false
-                            onValueChanged(item)
-                        },
-                        text = {
-                            Text(text = item)
-                        }
-                    )
-                }
-            }
-
-            Button(onClick = { expanded.value = !expanded.value }) {
-                Text(text = "Abrir/Cerrar")
-            }
-        }
-    }
-
     @Composable
     fun crearGastoButton(
-            categoria: String,
-            titulo: String,
-            monto: Double,
-            observaciones: String,
-            fuente: String
+        categoria: String,
+        titulo: String,
+        monto: Double,
+        observaciones: String,
+        fuente: String
     ) {
         val db = Firebase.firestore
         Button(
@@ -208,19 +253,27 @@ class RegistrarGastoActivity : AppCompatActivity() {
                     "title"         to titulo,
                     "amount"        to monto,
                     "observations"  to observaciones,
-                    "source"        to fuente
-            )
+                    "source"        to fuente,
+                    "date"          to Timestamp(Date())
+                )
 
-            db.collection("gastos")
-                .add(gasto)
-                .addOnSuccessListener { documentReference ->
-                    Log.d(ContentValues.TAG, "DocumentSnapshot added with ID: ${documentReference.id}")
-                }
-                .addOnFailureListener { e ->
-                    Log.w(ContentValues.TAG, "Error adding document", e)
-                }
+                db.collection("gastos")
+                    .add(gasto)
+                    .addOnSuccessListener { documentReference ->
+                        Log.d(ContentValues.TAG, "DocumentSnapshot added with ID: ${documentReference.id}")
+                        Toast.makeText(
+                            baseContext,
+                            "Gasto Registrado.",
+                            Toast.LENGTH_SHORT,
+                        ).show()
+                        startActivity(Intent(this, HistorialGastosActivity::class.java))
+                    }
 
-        }) {
+                    .addOnFailureListener { e ->
+                        Log.w(ContentValues.TAG, "Error adding document", e)
+                    }
+
+            }) {
             Text(text = "Registrar Gasto")
         }
     }

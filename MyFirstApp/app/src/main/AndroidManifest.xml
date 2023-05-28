@@ -12,9 +12,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyFirstApp"
         tools:targetApi="31">
-        <activity
-            android:name=".RegistrarGastoActivity"
-            android:exported="false" />
+        <activity android:name=".RegistrarGastosActivity" />
+        <activity android:name=".HistorialGastosActivity" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
