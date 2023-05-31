@@ -14,6 +14,7 @@
         tools:targetApi="31">
         <activity android:name=".RegistrarGastosActivity" />
         <activity android:name=".HistorialGastosActivity" />
+        <activity android:name=".PresupuestosActivity"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"
