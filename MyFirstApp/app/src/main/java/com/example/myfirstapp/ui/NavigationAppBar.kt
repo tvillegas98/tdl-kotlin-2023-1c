@@ -13,11 +13,11 @@ import com.example.myfirstapp.R
 
 @Composable
 //@Preview
-fun StandardNavigationAppBar(registrarGastos: () -> Unit, historialGastos: () -> Unit) {
+fun StandardNavigationAppBar(registrarGastos: () -> Unit, perfil: () -> Unit, historialGastos: () -> Unit) {
     androidx.compose.material3.BottomAppBar(
         actions = {
             //PERFIL
-            StandardIconButton(accion = { /*TODO*/ }, icon = Icons.Filled.Person)
+            StandardIconButton(accion = perfil, icon = Icons.Filled.Person)
 
             // REGISTRAR GASTO
             StandardIconButton(accion = registrarGastos, icon = Icons.Filled.Add)

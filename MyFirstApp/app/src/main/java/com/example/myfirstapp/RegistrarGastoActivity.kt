@@ -46,6 +46,7 @@ import java.util.Date
 class RegistrarGastosActivity : ComponentActivity() {
     private val registrarGastos = {startActivity(Intent(this, RegistrarGastosActivity::class.java))}
     private val historialGastos = {startActivity(Intent(this, HistorialGastosActivity::class.java))}
+    private val perfil = {startActivity(Intent(this, ProfileActivity::class.java))}
 
     @RequiresApi(Build.VERSION_CODES.M)
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -61,7 +62,7 @@ class RegistrarGastosActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     Scaffold(
-                        bottomBar = { StandardNavigationAppBar(registrarGastos=registrarGastos, historialGastos=historialGastos) }
+                        bottomBar = { StandardNavigationAppBar(registrarGastos=registrarGastos, perfil = perfil, historialGastos=historialGastos) }
                     ) {
                         registroDeGasto()
                     }

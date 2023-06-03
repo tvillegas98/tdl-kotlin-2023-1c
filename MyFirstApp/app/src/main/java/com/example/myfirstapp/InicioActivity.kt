@@ -136,19 +136,19 @@ class InicioActivity : ComponentActivity() {
             Spacer(modifier = Modifier.weight(.02f))
             StandardTextField(string = email, label ="email", onValueChanged = { email = it }, Icons.Default.Email)
             PasswordTextField(password = password, onValueChanged = { password = it })
-            signInButton(email = email, password = password)
+            SignInButton(email = email, password = password)
             Spacer(modifier = Modifier.weight(1f))
-            createAccountButton()
+            CreateAccountButton()
         }
     }
 
     @Composable
-    fun signInButton(email: String, password: String) {
+    fun SignInButton(email: String, password: String) {
         StandardButton(onClick = { signIn(email, password) }, label="Iniciar Sesion")
     }
 
     @Composable
-    fun createAccountButton() {
+    fun CreateAccountButton() {
         StandardButton(
             onClick = { startActivity(Intent(this, crearCuentaActivity::class.java)) },
             label="Crear Usuario"

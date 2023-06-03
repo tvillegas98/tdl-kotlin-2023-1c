@@ -33,6 +33,7 @@ import java.util.Locale
 class HistorialGastosActivity : ComponentActivity() {
     private val registrarGastos = {startActivity(Intent(this, RegistrarGastosActivity::class.java))}
     private val historialGastos = {startActivity(Intent(this, HistorialGastosActivity::class.java))}
+    private val perfil = {startActivity(Intent(this, ProfileActivity::class.java))}
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,7 +45,7 @@ class HistorialGastosActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ) {
                     Scaffold(
-                        bottomBar = { StandardNavigationAppBar(registrarGastos=registrarGastos, historialGastos=historialGastos) }
+                        bottomBar = { StandardNavigationAppBar(registrarGastos=registrarGastos, perfil = perfil, historialGastos=historialGastos) }
                     ) {
                         HistorialDeGastos()
                     }
