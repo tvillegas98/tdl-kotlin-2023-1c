@@ -28,7 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
-import com.example.myfirstapp.ui.AppTopBar
+import com.example.myfirstapp.ui.StandardTopAppBar
 import com.example.myfirstapp.ui.theme.MyFirstAppTheme
 import com.example.myfirstapp.ui.PasswordTextField
 import com.example.myfirstapp.ui.StandardTextField
@@ -57,9 +57,11 @@ class crearCuentaActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ) {
                     Scaffold(
-                        topBar = { AppTopBar(title="Crear Cuenta",
-                                            onBackClick = { startActivity(Intent(this, InicioActivity::class.java)) }
-                        ) }
+                        topBar = {
+                            StandardTopAppBar(
+                            onBackClick = { startActivity(Intent(this, InicioActivity::class.java)) }
+                            )
+                        }
                     ) {
                         askForUserData()
                     }

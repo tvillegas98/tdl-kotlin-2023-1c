@@ -1,9 +1,12 @@
 package com.example.myfirstapp
 
+import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,12 +15,15 @@ import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
+import com.example.myfirstapp.ui.StandardNavigationAppBar
 import com.example.myfirstapp.ui.theme.MyFirstAppTheme
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -25,6 +31,9 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 class HistorialGastosActivity : ComponentActivity() {
+    private val registrarGastos = {startActivity(Intent(this, RegistrarGastosActivity::class.java))}
+    private val historialGastos = {startActivity(Intent(this, HistorialGastosActivity::class.java))}
+    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -34,7 +43,11 @@ class HistorialGastosActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    HistorialDeGastos()
+                    Scaffold(
+                        bottomBar = { StandardNavigationAppBar(registrarGastos=registrarGastos, historialGastos=historialGastos) }
+                    ) {
+                        HistorialDeGastos()
+                    }
                 }
             }
         }
@@ -84,7 +97,11 @@ class HistorialGastosActivity : ComponentActivity() {
                 }
         }
 
-        Column {
+        Column (
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = colorResource(id = R.color.PrimaryColor))
+        ){
             gastos.value.forEach { lista ->
                 Card(
                     modifier = Modifier

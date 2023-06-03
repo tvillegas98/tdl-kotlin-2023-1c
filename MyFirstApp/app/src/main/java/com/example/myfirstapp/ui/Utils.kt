@@ -6,19 +6,21 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
-import androidx.compose.material.TextFieldColors
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -67,6 +69,35 @@ fun StandardButton(onClick: () -> Unit, label: String) {
         colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.FourthColor))
     ) {
         Text(text = label)
+    }
+}
+
+@Composable
+fun StandardIconButton(accion : () -> Unit, icon : ImageVector){
+    IconButton(
+        onClick = accion,
+        modifier = Modifier
+            .padding(horizontal = 12.dp)
+            .size(70.dp)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = "",
+            tint = Color.White,
+            modifier = Modifier.size(35.dp)
+        )
+    }
+}
+
+@Composable
+fun StandardBackButton(onBackClick: () -> Unit) {
+    androidx.compose.material.IconButton(onClick = onBackClick) {
+        Icon(
+            imageVector = Icons.Default.ArrowBack,
+            contentDescription = "Back",
+            tint = Color.Black,
+            modifier = Modifier.size(24.dp)
+        )
     }
 }
 
