@@ -84,7 +84,7 @@ class InicioActivity : ComponentActivity() {
                         "Bienvenid@ de vuelta!",
                         Toast.LENGTH_SHORT,
                     ).show()
-                    startActivity(Intent(this, RegistrarGastosActivity::class.java))
+                    startActivity(Intent(this, ProfileActivity::class.java))
                 } else {
                     // If sign in fails, display a message to the user.
                     Log.w(TAG, "signInWithEmail:failure", task.exception)
@@ -110,7 +110,7 @@ class InicioActivity : ComponentActivity() {
 
     private fun redirigir() {
         //TODO DESCOMENTAR CUANDO ESTE TODO HECHO
-        //startActivity(Intent(this, RegistrarGastosActivity::class.java))
+        //startActivity(Intent(this, ProfileActivity::class.java))
     }
 
     companion object {
@@ -132,7 +132,7 @@ class InicioActivity : ComponentActivity() {
                 .fillMaxSize()
                 .background(color = colorResource(id = R.color.PrimaryColor))
         ) {
-            Text(text="Bienvenido", style=MaterialTheme.typography.h3)
+            Text(text="Bienvenid@!", style=MaterialTheme.typography.h3)
             Spacer(modifier = Modifier.weight(.02f))
             StandardTextField(string = email, label ="email", onValueChanged = { email = it }, Icons.Default.Email)
             PasswordTextField(password = password, onValueChanged = { password = it })

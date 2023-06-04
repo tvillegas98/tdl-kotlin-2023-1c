@@ -23,7 +23,7 @@ fun StandardNavigationAppBar(registrarGastos: () -> Unit, perfil: () -> Unit, hi
             StandardIconButton(accion = registrarGastos, icon = Icons.Filled.Add)
 
             // HISTORIAL GASTOS
-            StandardIconButton(accion = historialGastos , icon = Icons.Filled.List)
+            StandardIconButton(accion = historialGastos, icon = Icons.Filled.List)
 
             // ESTADISTICAS / GRAFICOS
             StandardIconButton(accion = { /*TODO*/ }, icon = Icons.Filled.Info)

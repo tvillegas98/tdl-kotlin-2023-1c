@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -38,6 +39,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.myfirstapp.ui.ButtonPerfil
 import com.example.myfirstapp.ui.StandardButton
 import com.example.myfirstapp.ui.StandardNavigationAppBar
 import com.example.myfirstapp.ui.theme.MyFirstAppTheme
@@ -59,10 +61,14 @@ class ProfileActivity : ComponentActivity() {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = colorResource(id = R.color.PrimaryColor)
                 ) {
                     Scaffold(
-                        bottomBar = { StandardNavigationAppBar(registrarGastos=registrarGastos, perfil = perfil, historialGastos=historialGastos) }
+                        bottomBar = { StandardNavigationAppBar(
+                            registrarGastos=registrarGastos,
+                            perfil = perfil,
+                            historialGastos=historialGastos)
+                        }
                     ) {
                         ProfileMenu("Santiago", 1)
                     }
@@ -79,85 +85,27 @@ class ProfileActivity : ComponentActivity() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
             modifier = Modifier
-                .fillMaxSize()
                 .fillMaxWidth()
-                .background(color = colorResource(id = R.color.white))
+                .background(color = colorResource(id = R.color.PrimaryColor))
         ) {
-            Image(painter = img, contentDescription = null, contentScale = ContentScale.Fit, modifier = Modifier
+            Image(painter = img,
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                alignment = Alignment.TopCenter,
+                modifier = Modifier
                 .height(300.dp)
                 .width(300.dp)
-                .fillMaxWidth()
-                .align(Alignment.CenterHorizontally))
+            )
+
             Text(text = name, style= androidx.compose.material.MaterialTheme.typography.h3)
             Text(text = "Nivel $level", style= androidx.compose.material.MaterialTheme.typography.h5)
-            Button(
-                onClick = { },
-                colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.white)),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Start
-                ) {
-                    Icon(imageVector = Icons.Default.Person, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = "Datos personales")
-                }
-            }
-            Button(
-                onClick = { },
-                colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.white)),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Start
-                ) {
-                    Icon(imageVector = Icons.Default.Settings, contentDescription = null)
-                    Text(text = "Configuración")
-                }
-            }
-            Button(
-                onClick = { },
-                colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.white)),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Start
-                ) {
-                    Icon(imageVector = Icons.Default.Warning, contentDescription = null)
-                    Text(text = "Botón de baja")
-                }
-            }
-            Button(
-                onClick = { },
-                colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.white)),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Start
-                ) {
-                    Icon(imageVector = Icons.Default.Info, contentDescription = null)
-                    Text(text = "Preguntas frecuentes")
-                }
-            }
-            Button(
-                onClick = { },
-                colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.white)),
-                modifier = Modifier
-                    .align(Alignment.Start)
-                    .fillMaxWidth()
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Start
-                ) {
-                    Icon(imageVector = Icons.Default.Call, contentDescription = null)
-                    Text(text = "Soporte")
-                }
-            }
+
+            ButtonPerfil(icon = Icons.Default.Person, label = "Datos Personales", action = {})
+            ButtonPerfil(icon = Icons.Default.Settings, label = "Configuración", action = {})
+            ButtonPerfil(icon = Icons.Default.Warning, label = "Botón de baja", action = {})
+            ButtonPerfil(icon = Icons.Default.Info, label = "Preguntas frecuentes", action = {})
+            ButtonPerfil(icon = Icons.Default.Call, label = "Soporte", action = {})
+
             SignOutButton()
         }
     }

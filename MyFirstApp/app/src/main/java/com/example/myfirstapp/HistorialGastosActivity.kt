@@ -6,11 +6,14 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -41,11 +44,18 @@ class HistorialGastosActivity : ComponentActivity() {
             MyFirstAppTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
                     Scaffold(
-                        bottomBar = { StandardNavigationAppBar(registrarGastos=registrarGastos, perfil = perfil, historialGastos=historialGastos) }
+                        bottomBar = { StandardNavigationAppBar(
+                            registrarGastos=registrarGastos,
+                            perfil = perfil,
+                            historialGastos=historialGastos)
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
                     ) {
                         HistorialDeGastos()
                     }
@@ -71,7 +81,7 @@ class HistorialGastosActivity : ComponentActivity() {
                         document.getString("category")?.let {
                             gastoList.add("Categoria: $it")
                         }
-                        document.getDouble("amount")?.let {
+                        document.getString("amount")?.let {
                             gastoList.add("Precio: $$it")
                         }
                         document.getDate("date")?.let { date ->
@@ -100,6 +110,7 @@ class HistorialGastosActivity : ComponentActivity() {
 
         Column (
             modifier = Modifier
+                .verticalScroll(state= rememberScrollState(),enabled = true)
                 .fillMaxSize()
                 .background(color = colorResource(id = R.color.PrimaryColor))
         ){
@@ -119,6 +130,5 @@ class HistorialGastosActivity : ComponentActivity() {
                 }
             }
         }
-
     }
 }
