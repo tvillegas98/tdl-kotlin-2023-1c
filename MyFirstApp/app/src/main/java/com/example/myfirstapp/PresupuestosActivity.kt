@@ -38,6 +38,12 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.type.Date
+import java.sql.Timestamp
+import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.util.Calendar
+import java.util.GregorianCalendar
 
 
 class PresupuestosActivity : ComponentActivity() {
@@ -59,7 +65,7 @@ class PresupuestosActivity : ComponentActivity() {
     @Composable
     fun registrarPresupuesto(){
         var categoria:      String by remember {mutableStateOf("")}
-        var montoBase: Double by remember { mutableStateOf(0.00) }
+        var montoBase: Double by remember { mutableStateOf(0.0) }
         val categorias: MutableList<String> = mutableListOf()
         val currentFirebaseUser = Firebase.auth.currentUser
 
@@ -125,7 +131,7 @@ class PresupuestosActivity : ComponentActivity() {
             value = monto.toString(),
             onValueChange = { newValue -> onValueChanged(newValue.toDouble()) },
             label = { Text("Monto") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
     }
 
@@ -193,31 +199,52 @@ class PresupuestosActivity : ComponentActivity() {
         montoBase: Double,
         userUID: String
     ) {
+        val calendario: Calendar = GregorianCalendar()
+        val dateFormat = SimpleDateFormat("MM-yyyy")
+        val fechaDelPresupuesto = dateFormat.format(calendario.time).toString()
         val db = Firebase.firestore
         Button(
             onClick = {
                 val presupuesto = hashMapOf(
                     "category"      to categoria,
                     "baseAmount"    to montoBase,
-                    "userUID" to userUID
+                    "userUID" to userUID,
+                    "date" to fechaDelPresupuesto
                 )
 
+
                 db.collection("presupuestos")
-                    .add(presupuesto)
-                    .addOnSuccessListener { documentReference ->
-                        Log.d(ContentValues.TAG, "DocumentSnapshot added with ID: ${documentReference.id}")
-                        Toast.makeText(
-                            baseContext,
-                            "Presupuesto registrado.",
-                            Toast.LENGTH_SHORT,
-                        ).show()
-                        startActivity(Intent(this, RegistrarGastosActivity::class.java))
-                    }
+                    .whereEqualTo("date", fechaDelPresupuesto)
+                    .whereEqualTo("category", categoria)
+                    .get()
+                    .addOnSuccessListener {documentReference ->
+                        if(documentReference.documents.size == 0){
+                            db.collection("presupuestos")
+                                .add(presupuesto)
+                                .addOnSuccessListener { documentReference ->
+                                    Log.d(ContentValues.TAG, "DocumentSnapshot added with ID: ${documentReference.id}")
+                                    Toast.makeText(
+                                        baseContext,
+                                        "Presupuesto registrado.",
+                                        Toast.LENGTH_SHORT,
+                                    ).show()
+                                    startActivity(Intent(this, RegistrarGastosActivity::class.java))
+                                }
 
+                                .addOnFailureListener { e ->
+                                    Log.w(ContentValues.TAG, "Error adding document", e)
+                                }
+                        }else{
+                            Toast.makeText(
+                                baseContext,
+                                "Ya existe un presupuesto para este mes y categoría.",
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                        }
+                    }
                     .addOnFailureListener { e ->
-                        Log.w(ContentValues.TAG, "Error adding document", e)
+                        Log.w(ContentValues.TAG, "Hubo un error al realizar la query", e)
                     }
-
             },
             modifier = Modifier.padding(vertical = 24.dp)
         ) {
