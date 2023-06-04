@@ -218,7 +218,7 @@ class PresupuestosActivity : ComponentActivity() {
                     .whereEqualTo("category", categoria)
                     .get()
                     .addOnSuccessListener {documentReference ->
-                        if(documentReference.documents.size == 0){
+                        if(documentReference.documents.isEmpty()){
                             db.collection("presupuestos")
                                 .add(presupuesto)
                                 .addOnSuccessListener { documentReference ->
