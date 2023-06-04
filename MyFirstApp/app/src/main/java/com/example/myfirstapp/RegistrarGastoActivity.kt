@@ -39,6 +39,7 @@ import com.example.myfirstapp.ui.StandardTextField
 import com.example.myfirstapp.ui.StandardNavigationAppBar
 import com.example.myfirstapp.ui.theme.MyFirstAppTheme
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import java.util.Date
@@ -47,6 +48,7 @@ class RegistrarGastosActivity : ComponentActivity() {
     private val registrarGastos = {startActivity(Intent(this, RegistrarGastosActivity::class.java))}
     private val historialGastos = {startActivity(Intent(this, HistorialGastosActivity::class.java))}
     private val perfil = {startActivity(Intent(this, ProfileActivity::class.java))}
+    private val presupuestos = {startActivity(Intent(this, PresupuestosActivity::class.java))}
 
     @RequiresApi(Build.VERSION_CODES.M)
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -62,7 +64,7 @@ class RegistrarGastosActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     Scaffold(
-                        bottomBar = { StandardNavigationAppBar(registrarGastos=registrarGastos, perfil = perfil, historialGastos=historialGastos) }
+                        bottomBar = { StandardNavigationAppBar(registrarGastos=registrarGastos, perfil = perfil, historialGastos=historialGastos, presupuestos = presupuestos ) }
                     ) {
                         registroDeGasto()
                     }
@@ -79,6 +81,8 @@ class RegistrarGastosActivity : ComponentActivity() {
         var monto:          String by remember { mutableStateOf("") }
         var observaciones:  String by remember { mutableStateOf("") }
         var fuente:         String by remember { mutableStateOf("") }
+        val currentFirebaseUser = Firebase.auth.currentUser
+
         //es compartido ??
         //se repetira ?? (cada semana o mes)
 
@@ -177,6 +181,7 @@ class RegistrarGastosActivity : ComponentActivity() {
         observaciones: String,
         fuente: String
     ) {
+        val currentFirebaseUser = Firebase.auth.currentUser
         val db = Firebase.firestore
         Button(
             colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.FourthColor)),
@@ -187,7 +192,8 @@ class RegistrarGastosActivity : ComponentActivity() {
                     "amount"        to monto,
                     "observations"  to observaciones,
                     "source"        to fuente,
-                    "date"          to Timestamp(Date())
+                    "date"          to Timestamp(Date()),
+                    "userUID"       to currentFirebaseUser!!.uid
                 )
 
                 db.collection("gastos")

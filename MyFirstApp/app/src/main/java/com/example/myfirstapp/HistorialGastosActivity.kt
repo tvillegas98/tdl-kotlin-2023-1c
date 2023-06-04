@@ -28,6 +28,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import com.example.myfirstapp.ui.StandardNavigationAppBar
 import com.example.myfirstapp.ui.theme.MyFirstAppTheme
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import java.text.SimpleDateFormat
@@ -37,6 +38,7 @@ class HistorialGastosActivity : ComponentActivity() {
     private val registrarGastos = {startActivity(Intent(this, RegistrarGastosActivity::class.java))}
     private val historialGastos = {startActivity(Intent(this, HistorialGastosActivity::class.java))}
     private val perfil = {startActivity(Intent(this, ProfileActivity::class.java))}
+    private val presupuestos = {startActivity(Intent(this, PresupuestosActivity::class.java))}
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,7 +54,8 @@ class HistorialGastosActivity : ComponentActivity() {
                         bottomBar = { StandardNavigationAppBar(
                             registrarGastos=registrarGastos,
                             perfil = perfil,
-                            historialGastos=historialGastos)
+                            historialGastos=historialGastos,
+                            presupuestos = presupuestos )
                         },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -65,11 +68,13 @@ class HistorialGastosActivity : ComponentActivity() {
     }
     @Composable
     fun HistorialDeGastos() {
+        val currentFirebaseUser = Firebase.auth.currentUser
         val db = Firebase.firestore
         val gastos = remember { mutableStateOf(emptyList<List<String>>()) }
 
         LaunchedEffect(Unit) {
             db.collection("gastos")
+                .whereEqualTo("userUID", currentFirebaseUser!!.uid)
                 .get()
                 .addOnSuccessListener { querySnapshot ->
                     val tempList = mutableListOf<List<String>>()
@@ -99,7 +104,7 @@ class HistorialGastosActivity : ComponentActivity() {
                     }
                     gastos.value = tempList
                 }
-                .addOnFailureListener { exception ->
+                .addOnFailureListener {
                     Toast.makeText(
                         baseContext,
                         "ERROR",

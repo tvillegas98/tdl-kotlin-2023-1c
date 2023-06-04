@@ -1,5 +1,6 @@
 package com.example.myfirstapp
 
+import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Intent
 import android.os.Bundle
@@ -11,15 +12,20 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -31,8 +37,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.example.myfirstapp.ui.DropdownMenu
+import com.example.myfirstapp.ui.StandardNavigationAppBar
+import com.example.myfirstapp.ui.StandardNumberField
 import com.example.myfirstapp.ui.theme.MyFirstAppTheme
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -47,7 +57,12 @@ import java.util.GregorianCalendar
 
 
 class PresupuestosActivity : ComponentActivity() {
+    private val registrarGastos = {startActivity(Intent(this, RegistrarGastosActivity::class.java))}
+    private val historialGastos = {startActivity(Intent(this, HistorialGastosActivity::class.java))}
+    private val perfil = {startActivity(Intent(this, ProfileActivity::class.java))}
+    private val presupuestos = {startActivity(Intent(this, PresupuestosActivity::class.java))}
 
+    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -57,7 +72,11 @@ class PresupuestosActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    registrarPresupuesto()
+                    Scaffold(
+                        bottomBar = { StandardNavigationAppBar(registrarGastos=registrarGastos, perfil = perfil, historialGastos=historialGastos, presupuestos = presupuestos ) }
+                    ) {
+                        registrarPresupuesto()
+                    }
                 }
             }
         }
@@ -65,7 +84,7 @@ class PresupuestosActivity : ComponentActivity() {
     @Composable
     fun registrarPresupuesto(){
         var categoria:      String by remember {mutableStateOf("")}
-        var montoBase: Double by remember { mutableStateOf(0.0) }
+        var montoBase: String by remember {mutableStateOf("")}
         val categorias: MutableList<String> = mutableListOf()
         val currentFirebaseUser = Firebase.auth.currentUser
 
@@ -73,7 +92,7 @@ class PresupuestosActivity : ComponentActivity() {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Cyan)
+                .background(color = colorResource(id = R.color.PrimaryColor))
         ){
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -92,8 +111,12 @@ class PresupuestosActivity : ComponentActivity() {
                     categorias,
                     { categoria = it }
                 )
-                MontoTextField(monto = montoBase, onValueChanged = {montoBase = it})
-
+                StandardNumberField(
+                    string = montoBase,
+                    label = "Monto",
+                    onValueChanged = {montoBase = it},
+                    icon = Icons.Default.ShoppingCart
+                )
                 crearPresupuestoButton(
                     categoria = categoria,
                     montoBase = montoBase,
@@ -135,68 +158,10 @@ class PresupuestosActivity : ComponentActivity() {
         )
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    fun DropdownMenu(
-        asuntoTextField: String,
-        asunto: String,
-        opciones: List<String>,
-        onValueChanged: (String) -> Unit
-    ) {
-
-        val selectedItem = remember { mutableStateOf(asunto) }
-        var expanded by remember { mutableStateOf(false) }
-
-        Column {
-
-            val isPlaceholderVisible = selectedItem.value.isEmpty()
-            if (isPlaceholderVisible) {
-                Text(
-                    text = "Seleccionar $asuntoTextField",
-                    color = Color.Gray,
-                    modifier = Modifier.padding(vertical = 16.dp)
-                )
-            }
-
-            ExposedDropdownMenuBox(
-                expanded = expanded,
-                onExpandedChange = {
-                    expanded = it
-                }
-            ) {
-                TextField(
-                    value = selectedItem.value,
-                    onValueChange = { },
-                    readOnly = true,
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                    modifier = Modifier.menuAnchor()
-                )
-
-                ExposedDropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    opciones.forEach { item ->
-                        DropdownMenuItem(
-                            onClick = {
-                                selectedItem.value = item
-                                expanded = false
-                                onValueChanged(item)
-                            },
-                            text = {
-                                Text(text = item)
-                            }
-                        )
-                    }
-                }
-            }
-        }
-    }
-
     @Composable
     fun crearPresupuestoButton(
         categoria: String,
-        montoBase: Double,
+        montoBase: String,
         userUID: String
     ) {
         val calendario: Calendar = GregorianCalendar()
@@ -209,7 +174,8 @@ class PresupuestosActivity : ComponentActivity() {
                     "category"      to categoria,
                     "baseAmount"    to montoBase,
                     "userUID" to userUID,
-                    "date" to fechaDelPresupuesto
+                    "date" to fechaDelPresupuesto,
+                    "spentAmount" to 0.0
                 )
 
 
@@ -245,8 +211,7 @@ class PresupuestosActivity : ComponentActivity() {
                     .addOnFailureListener { e ->
                         Log.w(ContentValues.TAG, "Hubo un error al realizar la query", e)
                     }
-            },
-            modifier = Modifier.padding(vertical = 24.dp)
+            }
         ) {
             Text(text = "Crear Presupuesto")
         }

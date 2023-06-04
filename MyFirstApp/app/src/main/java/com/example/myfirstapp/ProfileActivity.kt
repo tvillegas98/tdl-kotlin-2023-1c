@@ -50,6 +50,7 @@ class ProfileActivity : ComponentActivity() {
     private val registrarGastos = {startActivity(Intent(this, RegistrarGastosActivity::class.java))}
     private val historialGastos = {startActivity(Intent(this, HistorialGastosActivity::class.java))}
     private val perfil = {startActivity(Intent(this, ProfileActivity::class.java))}
+    private val presupuestos = {startActivity(Intent(this, PresupuestosActivity::class.java))}
 
     @RequiresApi(Build.VERSION_CODES.M)
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -67,7 +68,8 @@ class ProfileActivity : ComponentActivity() {
                         bottomBar = { StandardNavigationAppBar(
                             registrarGastos=registrarGastos,
                             perfil = perfil,
-                            historialGastos=historialGastos)
+                            historialGastos=historialGastos,
+                            presupuestos=presupuestos)
                         }
                     ) {
                         ProfileMenu("Santiago", 1)
@@ -130,7 +132,7 @@ class ProfileActivity : ComponentActivity() {
                 color = MaterialTheme.colorScheme.background
             ) {
                 Scaffold(
-                    bottomBar = { StandardNavigationAppBar(registrarGastos=registrarGastos, perfil = perfil, historialGastos=historialGastos) }
+                    bottomBar = { StandardNavigationAppBar(registrarGastos=registrarGastos, perfil = perfil, historialGastos=historialGastos, presupuestos=presupuestos) }
                 ) {
                     ProfileMenu("Santiago", 1)
                 }

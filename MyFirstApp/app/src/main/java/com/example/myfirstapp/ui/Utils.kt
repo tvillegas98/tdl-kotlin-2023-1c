@@ -156,13 +156,10 @@ fun DropdownMenu(
 
     Column {
 
-        val isPlaceholderVisible = selectedItem.value.isEmpty()
-        if (isPlaceholderVisible) {
             androidx.compose.material3.Text(
                 text = "Seleccionar $asuntoTextField",
                 modifier = Modifier.padding(vertical = 16.dp)
             )
-        }
 
         ExposedDropdownMenuBox(
             expanded = expanded,
