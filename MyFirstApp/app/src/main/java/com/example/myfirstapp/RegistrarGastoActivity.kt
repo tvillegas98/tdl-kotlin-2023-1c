@@ -189,6 +189,9 @@ class RegistrarGastosActivity : ComponentActivity() {
                             "Gasto Registrado.",
                             Toast.LENGTH_SHORT,
                         ).show()
+
+                        incrementarGastosEnPresupuesto(categoria, monto, gasto.get("userUID").toString())
+
                         startActivity(Intent(this, HistorialGastosActivity::class.java))
                     }
 
@@ -200,5 +203,27 @@ class RegistrarGastosActivity : ComponentActivity() {
         ) {
             Text(text = "Registrar Gasto")
         }
+    }
+
+    private fun incrementarGastosEnPresupuesto(categoria: String, monto: String, userUID: String){
+        var monto = monto.toDouble()
+        val db = Firebase.firestore
+
+        db.collection("presupuestos")
+            .whereEqualTo("category", categoria)
+            .whereEqualTo("userUID", userUID)
+            .get()
+            .addOnSuccessListener { documentReference ->
+                if(documentReference.documents.isNotEmpty()){
+                    val gastoDelPresupuesto = documentReference.documents[0]["spentAmount"].toString().toDouble()
+                    val nuevoGastoDelPresupuesto = gastoDelPresupuesto + monto
+                    documentReference.documents[0]
+                        .reference
+                        .update("spentAmount", nuevoGastoDelPresupuesto)
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.w(ContentValues.TAG, "Error retrieving document", e)
+            }
     }
 }
