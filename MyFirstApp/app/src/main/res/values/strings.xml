@@ -22,4 +22,5 @@
     <string name="personal_card_cel">1158272749</string>
     <string name="personal_card_git">ruizsugliani</string>
     <string name="personal_card_mail">santiago.ruiz.sugliani@gmail.com</string>
+    <string name="title_activity_profile">ProfileActivity</string>
 </resources>

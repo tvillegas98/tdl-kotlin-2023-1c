@@ -1,51 +1,80 @@
 package com.example.myfirstapp
 
+import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Card
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
+import com.example.myfirstapp.ui.StandardNavigationAppBar
 import com.example.myfirstapp.ui.theme.MyFirstAppTheme
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import java.text.SimpleDateFormat
 import java.util.Locale
 
 class HistorialGastosActivity : ComponentActivity() {
+    private val registrarGastos = {startActivity(Intent(this, RegistrarGastosActivity::class.java))}
+    private val historialGastos = {startActivity(Intent(this, HistorialGastosActivity::class.java))}
+    private val perfil = {startActivity(Intent(this, ProfileActivity::class.java))}
+    private val presupuestos = {startActivity(Intent(this, PresupuestosActivity::class.java))}
+    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MyFirstAppTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    color = MaterialTheme.colors.background
                 ) {
-                    HistorialDeGastos()
+                    Scaffold(
+                        bottomBar = { StandardNavigationAppBar(
+                            registrarGastos=registrarGastos,
+                            perfil = perfil,
+                            historialGastos=historialGastos,
+                            presupuestos = presupuestos )
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        HistorialDeGastos()
+                    }
                 }
             }
         }
     }
     @Composable
     fun HistorialDeGastos() {
+        val currentFirebaseUser = Firebase.auth.currentUser
         val db = Firebase.firestore
         val gastos = remember { mutableStateOf(emptyList<List<String>>()) }
 
         LaunchedEffect(Unit) {
             db.collection("gastos")
+                .whereEqualTo("userUID", currentFirebaseUser!!.uid)
                 .get()
                 .addOnSuccessListener { querySnapshot ->
                     val tempList = mutableListOf<List<String>>()
@@ -57,7 +86,7 @@ class HistorialGastosActivity : ComponentActivity() {
                         document.getString("category")?.let {
                             gastoList.add("Categoria: $it")
                         }
-                        document.getDouble("amount")?.let {
+                        document.getString("amount")?.let {
                             gastoList.add("Precio: $$it")
                         }
                         document.getDate("date")?.let { date ->
@@ -75,7 +104,7 @@ class HistorialGastosActivity : ComponentActivity() {
                     }
                     gastos.value = tempList
                 }
-                .addOnFailureListener { exception ->
+                .addOnFailureListener {
                     Toast.makeText(
                         baseContext,
                         "ERROR",
@@ -84,7 +113,12 @@ class HistorialGastosActivity : ComponentActivity() {
                 }
         }
 
-        Column {
+        Column (
+            modifier = Modifier
+                .verticalScroll(state= rememberScrollState(),enabled = true)
+                .fillMaxSize()
+                .background(color = colorResource(id = R.color.PrimaryColor))
+        ){
             gastos.value.forEach { lista ->
                 Card(
                     modifier = Modifier
@@ -101,6 +135,5 @@ class HistorialGastosActivity : ComponentActivity() {
                 }
             }
         }
-
     }
 }
