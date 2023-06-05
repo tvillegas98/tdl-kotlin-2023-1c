@@ -43,6 +43,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.myfirstapp.R
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 
 
 @RequiresApi(Build.VERSION_CODES.M)
@@ -194,4 +196,21 @@ fun DropdownMenu(
             }
         }
     }
+}
+
+fun obtenerDocumentos(nombreColeccion: String, lista: MutableList<String>) {
+    val db = Firebase.firestore
+    db.collection(nombreColeccion)
+        .get()
+        .addOnSuccessListener { querySnapshot ->
+            for (document in querySnapshot) {
+                val documentData = document.getString("name")
+                documentData?.let {
+                    lista.add(it)
+                }
+            }
+        }
+        .addOnFailureListener { exception ->
+            println("Error obteniendo documentos: $exception")
+        }
 }

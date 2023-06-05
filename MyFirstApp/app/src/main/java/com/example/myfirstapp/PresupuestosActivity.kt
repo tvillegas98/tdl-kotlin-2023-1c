@@ -12,23 +12,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,22 +27,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.dp
 import com.example.myfirstapp.ui.DropdownMenu
 import com.example.myfirstapp.ui.StandardNavigationAppBar
 import com.example.myfirstapp.ui.StandardNumberField
+import com.example.myfirstapp.ui.obtenerDocumentos
 import com.example.myfirstapp.ui.theme.MyFirstAppTheme
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.google.type.Date
-import java.sql.Timestamp
 import java.text.SimpleDateFormat
-import java.time.LocalDate
 import java.util.Calendar
 import java.util.GregorianCalendar
 
@@ -102,8 +87,7 @@ class PresupuestosActivity : ComponentActivity() {
                     .align(Alignment.Center)
             ) {
                 Text(
-                    text = "¿Cuánto querés gastar por mes?",
-                    color = Color.Gray
+                    text = "¿Cuánto querés gastar por mes?"
                 )
                 DropdownMenu(
                     "Categoría",
@@ -126,38 +110,6 @@ class PresupuestosActivity : ComponentActivity() {
         }
     }
 
-    /* Helpers */
-    private fun obtenerDocumentos(nombreColeccion: String, lista: MutableList<String>) {
-        val db = Firebase.firestore
-        db.collection(nombreColeccion)
-            .get()
-            .addOnSuccessListener { querySnapshot ->
-                for (document in querySnapshot) {
-                    val documentData = document.getString("name")
-                    documentData?.let {
-                        lista.add(it)
-                    }
-                }
-            }
-            .addOnFailureListener { exception ->
-                println("Error obteniendo documentos: $exception")
-            }
-    }
-
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    private fun MontoTextField(
-        monto: Double,
-        onValueChanged: (Double) -> Unit
-    ) {
-        TextField(
-            value = monto.toString(),
-            onValueChange = { newValue -> onValueChanged(newValue.toDouble()) },
-            label = { Text("Monto") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-        )
-    }
-
     @Composable
     fun crearPresupuestoButton(
         categoria: String,
@@ -168,6 +120,7 @@ class PresupuestosActivity : ComponentActivity() {
         val dateFormat = SimpleDateFormat("MM-yyyy")
         val fechaDelPresupuesto = dateFormat.format(calendario.time).toString()
         val db = Firebase.firestore
+
         Button(
             onClick = {
                 val presupuesto = hashMapOf(
@@ -201,11 +154,19 @@ class PresupuestosActivity : ComponentActivity() {
                                     Log.w(ContentValues.TAG, "Error adding document", e)
                                 }
                         }else{
-                            Toast.makeText(
-                                baseContext,
-                                "Ya existe un presupuesto para este mes y categoría.",
-                                Toast.LENGTH_SHORT,
-                            ).show()
+                            db.collection("presupuestos")
+                                .document(documentReference.documents[0].id)
+                                .update("baseAmount", montoBase)
+                                .addOnSuccessListener {
+                                    Toast.makeText(
+                                        baseContext,
+                                        "Se actualizó el monto base para esa categoría.",
+                                        Toast.LENGTH_SHORT,
+                                    ).show()
+                                }
+                                .addOnFailureListener { e ->
+                                    Log.w(ContentValues.TAG, "Error updating document", e)
+                                }
                         }
                     }
                     .addOnFailureListener { e ->

@@ -37,6 +37,7 @@ import com.example.myfirstapp.ui.DropdownMenu
 import com.example.myfirstapp.ui.StandardNumberField
 import com.example.myfirstapp.ui.StandardTextField
 import com.example.myfirstapp.ui.StandardNavigationAppBar
+import com.example.myfirstapp.ui.obtenerDocumentos
 import com.example.myfirstapp.ui.theme.MyFirstAppTheme
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
@@ -139,23 +140,6 @@ class RegistrarGastosActivity : ComponentActivity() {
                 fuente          = fuente
             )
         }
-    }
-
-    fun obtenerDocumentos(nombreColeccion: String, lista: MutableList<String>) {
-        val db = Firebase.firestore
-        db.collection(nombreColeccion)
-            .get()
-            .addOnSuccessListener { querySnapshot ->
-                for (document in querySnapshot) {
-                    val documentData = document.getString("name")
-                    documentData?.let {
-                        lista.add(it)
-                    }
-                }
-            }
-            .addOnFailureListener { exception ->
-                println("Error obteniendo documentos: $exception")
-            }
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
