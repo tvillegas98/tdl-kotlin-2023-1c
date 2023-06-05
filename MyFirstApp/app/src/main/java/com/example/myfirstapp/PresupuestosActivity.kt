@@ -127,13 +127,12 @@ class PresupuestosActivity : ComponentActivity() {
                     "category"      to categoria,
                     "baseAmount"    to montoBase,
                     "userUID" to userUID,
-                    "date" to fechaDelPresupuesto,
+                    "creationDate" to fechaDelPresupuesto,
                     "spentAmount" to 0.0
                 )
 
 
                 db.collection("presupuestos")
-                    .whereEqualTo("date", fechaDelPresupuesto)
                     .whereEqualTo("category", categoria)
                     .get()
                     .addOnSuccessListener {documentReference ->
