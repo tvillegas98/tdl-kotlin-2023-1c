@@ -47,6 +47,7 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
 class ProfileActivity : ComponentActivity() {
+    private val home = {startActivity(Intent(this, HomeActivity::class.java))}
     private val registrarGastos = {startActivity(Intent(this, RegistrarGastosActivity::class.java))}
     private val historialGastos = {startActivity(Intent(this, HistorialGastosActivity::class.java))}
     private val perfil = {startActivity(Intent(this, ProfileActivity::class.java))}
@@ -66,6 +67,7 @@ class ProfileActivity : ComponentActivity() {
                 ) {
                     Scaffold(
                         bottomBar = { StandardNavigationAppBar(
+                            home=home,
                             registrarGastos=registrarGastos,
                             perfil = perfil,
                             historialGastos=historialGastos,
@@ -132,7 +134,7 @@ class ProfileActivity : ComponentActivity() {
                 color = MaterialTheme.colorScheme.background
             ) {
                 Scaffold(
-                    bottomBar = { StandardNavigationAppBar(registrarGastos=registrarGastos, perfil = perfil, historialGastos=historialGastos, presupuestos=presupuestos) }
+                    bottomBar = { StandardNavigationAppBar(home=home,registrarGastos=registrarGastos, perfil = perfil, historialGastos=historialGastos, presupuestos=presupuestos) }
                 ) {
                     ProfileMenu("Santiago", 1)
                 }

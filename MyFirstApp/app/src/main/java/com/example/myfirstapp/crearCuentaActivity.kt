@@ -35,7 +35,7 @@ import com.example.myfirstapp.ui.StandardButton
 import com.example.myfirstapp.ui.StandardTopAppBar
 import com.google.firebase.auth.FirebaseAuth
 
-class crearCuentaActivity : ComponentActivity() {
+class CrearCuentaActivity : ComponentActivity() {
 
     // [START declare_auth]
     private lateinit var auth: FirebaseAuth

@@ -20,8 +20,9 @@
         <activity android:name=".RegistrarGastosActivity" />
         <activity android:name=".HistorialGastosActivity" />
         <activity android:name=".InicioActivity" />
-        <activity android:name=".crearCuentaActivity" />
+        <activity android:name=".CrearCuentaActivity" />
         <activity android:name=".PresupuestosActivity"/>
+        <activity android:name=".HomeActivity"/>
         <activity
                 android:name=".MainActivity"
                 android:exported="true"

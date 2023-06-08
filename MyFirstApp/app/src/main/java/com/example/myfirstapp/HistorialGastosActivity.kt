@@ -35,6 +35,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 class HistorialGastosActivity : ComponentActivity() {
+    private val home = {startActivity(Intent(this, HomeActivity::class.java))}
     private val registrarGastos = {startActivity(Intent(this, RegistrarGastosActivity::class.java))}
     private val historialGastos = {startActivity(Intent(this, HistorialGastosActivity::class.java))}
     private val perfil = {startActivity(Intent(this, ProfileActivity::class.java))}
@@ -52,6 +53,7 @@ class HistorialGastosActivity : ComponentActivity() {
                 ) {
                     Scaffold(
                         bottomBar = { StandardNavigationAppBar(
+                            home=home,
                             registrarGastos=registrarGastos,
                             perfil = perfil,
                             historialGastos=historialGastos,

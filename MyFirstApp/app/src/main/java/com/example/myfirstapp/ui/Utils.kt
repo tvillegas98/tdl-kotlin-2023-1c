@@ -85,10 +85,7 @@ fun StandardButton(onClick: () -> Unit, label: String) {
 @Composable
 fun StandardIconButton(accion : () -> Unit, icon : ImageVector){
     IconButton(
-        onClick = accion,
-        modifier = Modifier
-            .padding(horizontal = 12.dp)
-            .size(70.dp)
+        onClick = accion
     ) {
         Icon(
             imageVector = icon,
