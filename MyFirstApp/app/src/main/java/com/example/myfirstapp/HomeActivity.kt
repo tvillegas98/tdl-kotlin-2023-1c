@@ -1,49 +1,38 @@
 package com.example.myfirstapp
 
 import DrawPieChart
-import PieChartData
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
-import android.view.ViewGroup
-import android.widget.LinearLayout
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.*
-import androidx.compose.ui.viewinterop.AndroidView
 import com.example.myfirstapp.ui.StandardNavigationAppBar
 import com.example.myfirstapp.ui.theme.MyFirstAppTheme
-import com.github.mikephil.charting.charts.PieChart
-import com.github.mikephil.charting.data.PieData
-import com.github.mikephil.charting.data.PieDataSet
-import com.github.mikephil.charting.data.PieEntry
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
-import blueColor
+import androidx.compose.ui.res.colorResource
 import com.example.myfirstapp.ui.StandardButton
-import com.example.myfirstapp.ui.StandardIconButton
-import com.github.mikephil.charting.components.Legend
-import getPieChartData
-import greenColor
-import redColor
-import yellowColor
+import com.example.myfirstapp.ui.coloresPieChart
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import java.text.SimpleDateFormat
 import java.util.*
 
 class HomeActivity : ComponentActivity() {
@@ -76,34 +65,128 @@ class HomeActivity : ComponentActivity() {
                         modifier = Modifier
                             .fillMaxWidth()
                     ) {
-                        home()
+                        HomeScreen()
                     }
                 }
             }
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     @Composable
-    fun home() {
-        Column(
-            modifier=Modifier.background(color=Color.Blue),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            DrawPieChart()
+    private fun HomeScreen() {
+        val gastosPorCategoria: Map<String, Float> = obtenerGastoPorCategoria()
+        val mapOrdenado : Map<String, Float> = sortMapByValue(gastosPorCategoria)
 
-            Row (
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            DrawPieChart(mapOrdenado)
+
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 25.dp)
-                    .background(color= Color.Red),
+                    .padding(horizontal = 25.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
-
-                    ){
-                StandardButton(onClick = historialGastos, label = "Historial Completo")
+            ) {
                 StandardButton(onClick = registrarGastos, label = "Nuevo Gasto")
-//                StandardIconButton(accion = registrarGastos, icon = Icons.Default.Add)
+                StandardButton(onClick = historialGastos, label = "Historial Completo")
+            }
+
+            DrawSummary(mapOrdenado)
+        }
+    }
+
+    @Composable
+    private fun DrawSummary(gastosPorCategoria: Map<String, Float>) {
+        var indice : Int = 0
+        Column (
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState(), enabled = true)
+                .padding(bottom = 80.dp)
+        ) {
+            gastosPorCategoria.forEach { (categoria, monto) ->
+                Card (
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                        .clickable(onClick = historialPorCategoria(categoria)),
+                    elevation = 8.dp, // Configura la elevación para aplicar una sombra
+                    shape = RoundedCornerShape(8.dp), // Configura la forma redondeada del borde de la Card
+                ) {
+                    Row (
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(15.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(13.dp)
+                                .background(color = coloresPieChart[indice])
+                        )
+                        Text("$categoria")
+                        Text("$$monto")
+                    }
+                }
+                indice++
             }
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
+    @Composable
+    private fun obtenerGastoPorCategoria(): Map<String, Float> {
+        val currentFirebaseUser = Firebase.auth.currentUser
+        val db = Firebase.firestore
+        val gastosPorCategoria= remember { mutableStateOf(emptyMap<String, Float>()) }
+
+        LaunchedEffect(Unit) {
+            db.collection("gastos")
+                .whereEqualTo("userUID", currentFirebaseUser!!.uid)
+                .get()
+                .addOnSuccessListener { querySnapshot ->
+                    val tempMap = mutableMapOf<String, Float>()
+                    for (document in querySnapshot) {
+                        val categoria = document.getString("category")
+                        val monto = document.getString("amount")?.toFloatOrNull()
+
+                        if (categoria != null && monto != null) {
+                            if (tempMap.containsKey(categoria)) {
+                                val valorExistente = tempMap.getValue(categoria)
+                                tempMap[categoria] = valorExistente + monto
+                            } else {
+                                tempMap[categoria] = monto
+                            }
+                        }
+                    }
+                    gastosPorCategoria.value = tempMap
+                }
+                .addOnFailureListener {
+                    Toast.makeText(
+                        baseContext,
+                        "ERROR",
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                }
+        }
+
+        return gastosPorCategoria.value
+    }
+
+    private fun sortMapByValue(map: Map<String, Float>): Map<String, Float> {
+        return map.toList()
+            .sortedByDescending { (_, value) -> value }
+            .toMap()
+    }
+
+    private fun historialPorCategoria(categoria : String): () -> Unit {
+        val intent = Intent(this, HistorialGastosActivity::class.java)
+        intent.putExtra("categoria", categoria)
+        return {startActivity(intent)}
+    }
 }

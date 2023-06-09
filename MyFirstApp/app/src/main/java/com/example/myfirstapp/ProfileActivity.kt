@@ -89,7 +89,8 @@ class ProfileActivity : ComponentActivity() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
+                .padding(bottom=80.dp)
                 .background(color = colorResource(id = R.color.PrimaryColor))
         ) {
             Image(painter = img,

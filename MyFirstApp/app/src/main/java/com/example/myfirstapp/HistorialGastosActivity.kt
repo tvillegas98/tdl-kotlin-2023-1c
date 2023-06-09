@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import com.example.myfirstapp.ui.StandardNavigationAppBar
+import com.example.myfirstapp.ui.StandardTopAppBar
 import com.example.myfirstapp.ui.theme.MyFirstAppTheme
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
@@ -43,15 +44,21 @@ class HistorialGastosActivity : ComponentActivity() {
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val parametro = intent.getStringExtra("categoria")
+
         setContent {
             MyFirstAppTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier
                         .fillMaxSize(),
-                    color = MaterialTheme.colors.background
+                    color = colorResource(id = R.color.PrimaryColor)
                 ) {
                     Scaffold(
+                        topBar = {
+                            StandardTopAppBar(onBackClick=home)
+                        },
                         bottomBar = { StandardNavigationAppBar(
                             home=home,
                             registrarGastos=registrarGastos,
@@ -62,22 +69,28 @@ class HistorialGastosActivity : ComponentActivity() {
                         modifier = Modifier
                             .fillMaxWidth()
                     ) {
-                        HistorialDeGastos()
+                        HistorialDeGastos(parametro)
                     }
                 }
             }
         }
     }
     @Composable
-    fun HistorialDeGastos() {
+    fun HistorialDeGastos(categoria : String? = null) {
         val currentFirebaseUser = Firebase.auth.currentUser
         val db = Firebase.firestore
         val gastos = remember { mutableStateOf(emptyList<List<String>>()) }
 
         LaunchedEffect(Unit) {
-            db.collection("gastos")
+            var collectionRef = db.collection("gastos")
                 .whereEqualTo("userUID", currentFirebaseUser!!.uid)
-                .get()
+
+            // Si la categoria no es nula la filtro
+            if (categoria != null) {
+                collectionRef = collectionRef.whereEqualTo("category", categoria)
+            }
+
+            collectionRef.get()
                 .addOnSuccessListener { querySnapshot ->
                     val tempList = mutableListOf<List<String>>()
                     for (document in querySnapshot) {
@@ -117,8 +130,9 @@ class HistorialGastosActivity : ComponentActivity() {
 
         Column (
             modifier = Modifier
-                .verticalScroll(state= rememberScrollState(),enabled = true)
                 .fillMaxSize()
+                .verticalScroll(state = rememberScrollState(), enabled = true)
+                .padding(top=55.dp, bottom = 80.dp)
                 .background(color = colorResource(id = R.color.PrimaryColor))
         ){
             gastos.value.forEach { lista ->

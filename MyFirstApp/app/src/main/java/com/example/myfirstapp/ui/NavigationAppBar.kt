@@ -59,7 +59,7 @@ fun StandardTopAppBar(
         navigationIcon = {
             StandardBackButton(onBackClick)
         },
-        backgroundColor = colorResource(id = R.color.ThirdColor),
+        backgroundColor = colorResource(id = R.color.FourthColor),
         elevation = 0.dp
     )
 }

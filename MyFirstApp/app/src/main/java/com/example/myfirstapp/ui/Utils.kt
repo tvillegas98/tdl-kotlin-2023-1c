@@ -46,6 +46,14 @@ import com.example.myfirstapp.R
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
+val greenColor = Color(0xFF0F9D58)
+val blueColor = Color(0xFF2196F3)
+val yellowColor = Color(0xFFFFC107)
+val redColor = Color(0xFFF44336)
+val pinkColor = Color(0xFFFF0CFF)
+val orangeColor = Color(0xFFFF8F00)
+val whiteColor = Color(0xFFFFFFFF)
+val coloresPieChart = listOf<Color>(greenColor,blueColor,yellowColor, redColor, orangeColor, pinkColor)
 
 @RequiresApi(Build.VERSION_CODES.M)
 @OptIn(ExperimentalMaterial3Api::class)
