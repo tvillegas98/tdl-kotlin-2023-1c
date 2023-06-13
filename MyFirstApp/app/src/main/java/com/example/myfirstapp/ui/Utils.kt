@@ -1,10 +1,13 @@
 package com.example.myfirstapp.ui
 
 
+import android.content.ContentValues
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -19,17 +23,24 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
-import androidx.compose.material.TextFieldColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.outlined.Fastfood
+import androidx.compose.material.icons.outlined.Flight
+import androidx.compose.material.icons.outlined.MedicalServices
+import androidx.compose.material.icons.outlined.Money
+import androidx.compose.material.icons.outlined.QuestionMark
+import androidx.compose.material.icons.outlined.Sell
+import androidx.compose.material.icons.outlined.ShoppingBag
+import androidx.compose.material.icons.outlined.SportsEsports
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,6 +54,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.myfirstapp.R
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
@@ -117,15 +129,15 @@ fun StandardBackButton(onBackClick: () -> Unit) {
 }
 
 @Composable
-fun ButtonPerfil(icon: ImageVector, label : String, action : () -> Unit) {
+fun ButtonPerfil(icon: ImageVector, label : String, onClick : () -> Unit) {
     Button(
-        onClick = action,
+        onClick = onClick,
         colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.white)),
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             androidx.compose.material3.Icon(imageVector = icon, contentDescription = null)
             Spacer(modifier = Modifier.width(8.dp))
@@ -217,5 +229,63 @@ fun obtenerDocumentos(nombreColeccion: String, lista: MutableList<String>) {
         }
         .addOnFailureListener { exception ->
             println("Error obteniendo documentos: $exception")
+        }
+}
+@Composable
+fun CategoryIconBox(category: String, colorIndex: Int) {
+    val icon = when (category) {
+        "General" -> Icons.Outlined.ShoppingBag
+        "Entretenimiento" -> Icons.Outlined.SportsEsports
+        "Viajes" -> Icons.Outlined.Flight
+        "Salud" -> Icons.Outlined.MedicalServices
+        "Gastronomia" -> Icons.Outlined.Fastfood
+        "Compras" -> Icons.Outlined.Sell
+        else -> Icons.Outlined.QuestionMark
+    }
+
+    Box(
+        modifier = Modifier
+            .size(40.dp)
+            .background(color = coloresPieChart[colorIndex], RoundedCornerShape(16.dp))
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = Color.White,
+            modifier = Modifier.align(Alignment.Center)
+        )
+    }
+}
+
+fun getUserData(
+    emailState: MutableState<String>,
+    firstNameState: MutableState<String>,
+    lastNameState: MutableState<String>,
+    birthDayState: MutableState<String>
+) {
+    val db = Firebase.firestore
+    val currentFirebaseUser = Firebase.auth.currentUser
+    val userId = currentFirebaseUser!!.uid
+
+    val query = db.collection("usersData").whereEqualTo("userId", userId)
+
+    query.get()
+        .addOnSuccessListener { querySnapshot ->
+            if (!querySnapshot.isEmpty) {
+                // Se encontró un documento, con lo cual el usuario guardó sus datos y precargamos los inputs.
+                val documentSnapshot = querySnapshot.documents[0]
+                val retrievedEmail = documentSnapshot.getString("email") ?: ""
+                val retrievedFirstName = documentSnapshot.getString("firstName") ?: ""
+                val retrievedLastName = documentSnapshot.getString("lastName") ?: ""
+                val retrievedBirthDay = documentSnapshot.getString("birthDay") ?: ""
+
+                emailState.value = retrievedEmail
+                firstNameState.value = retrievedFirstName
+                lastNameState.value = retrievedLastName
+                birthDayState.value = retrievedBirthDay
+            }
+        }
+        .addOnFailureListener { e ->
+            Log.w(ContentValues.TAG, "Error getting documents", e)
         }
 }

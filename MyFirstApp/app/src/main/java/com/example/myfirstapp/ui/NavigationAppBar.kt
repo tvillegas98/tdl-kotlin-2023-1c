@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Leaderboard
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Wallet
@@ -43,7 +44,7 @@ fun StandardNavigationAppBar(home: () -> Unit, registrarGastos: () -> Unit, perf
                 StandardIconButton(accion = presupuestos, icon = Icons.Filled.Wallet)
 
                 // ESTADISTICAS / GRAFICOS
-                StandardIconButton(accion = { /*TODO*/ }, icon = Icons.Filled.Info)
+                StandardIconButton(accion = { /*TODO*/ }, icon = Icons.Filled.Leaderboard)
             }
         },
         containerColor = colorResource(id = R.color.FourthColor),

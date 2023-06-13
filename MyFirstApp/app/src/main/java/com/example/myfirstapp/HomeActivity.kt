@@ -5,34 +5,27 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.*
-import com.example.myfirstapp.ui.StandardNavigationAppBar
-import com.example.myfirstapp.ui.theme.MyFirstAppTheme
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.runtime.Composable
+import androidx.compose.material.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.*
+import com.example.myfirstapp.ui.CategoryIconBox
 import com.example.myfirstapp.ui.StandardButton
-import com.example.myfirstapp.ui.coloresPieChart
+import com.example.myfirstapp.ui.StandardNavigationAppBar
+import com.example.myfirstapp.ui.theme.MyFirstAppTheme
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import java.text.SimpleDateFormat
 import java.util.*
 
 class HomeActivity : ComponentActivity() {
@@ -124,11 +117,7 @@ class HomeActivity : ComponentActivity() {
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(13.dp)
-                                .background(color = coloresPieChart[indice])
-                        )
+                        CategoryIconBox(categoria, indice)
                         Text("$categoria")
                         Text("$$monto")
                     }
