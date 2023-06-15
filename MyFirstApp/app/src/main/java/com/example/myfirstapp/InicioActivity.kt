@@ -84,7 +84,7 @@ class InicioActivity : ComponentActivity() {
                         "Bienvenid@ de vuelta!",
                         Toast.LENGTH_SHORT,
                     ).show()
-                    startActivity(Intent(this, ProfileActivity::class.java))
+                    startActivity(Intent(this, HomeActivity::class.java))
                 } else {
                     // If sign in fails, display a message to the user.
                     Log.w(TAG, "signInWithEmail:failure", task.exception)
@@ -150,7 +150,7 @@ class InicioActivity : ComponentActivity() {
     @Composable
     fun CreateAccountButton() {
         StandardButton(
-            onClick = { startActivity(Intent(this, crearCuentaActivity::class.java)) },
+            onClick = { startActivity(Intent(this, CrearCuentaActivity::class.java)) },
             label="Crear Usuario"
         )
     }

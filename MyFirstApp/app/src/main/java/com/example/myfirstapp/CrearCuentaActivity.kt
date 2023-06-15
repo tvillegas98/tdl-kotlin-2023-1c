@@ -1,6 +1,7 @@
 package com.example.myfirstapp
 
 import android.annotation.SuppressLint
+import android.content.ContentValues
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -33,9 +34,14 @@ import com.example.myfirstapp.ui.PasswordTextField
 import com.example.myfirstapp.ui.StandardTextField
 import com.example.myfirstapp.ui.StandardButton
 import com.example.myfirstapp.ui.StandardTopAppBar
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import java.util.Date
 
-class crearCuentaActivity : ComponentActivity() {
+class CrearCuentaActivity : ComponentActivity() {
 
     // [START declare_auth]
     private lateinit var auth: FirebaseAuth
@@ -87,7 +93,7 @@ class crearCuentaActivity : ComponentActivity() {
             StandardTextField(string = apellido, label ="Apellido", onValueChanged = { apellido = it }, icon = Icons.Default.Person)
             StandardTextField(string = email, label ="Email",onValueChanged = { email = it }, icon=Icons.Default.Email)
             PasswordTextField(password = password, onValueChanged = { password = it })
-            createAccountButton(email = email, password = password, nombreCompleto = nombre+apellido)
+            createAccountButton(email = email, password = password, nombreCompleto = "$nombre $apellido")
         }
 
     }
@@ -106,6 +112,7 @@ class crearCuentaActivity : ComponentActivity() {
                 val signInMethods = task.result?.signInMethods
                 if (signInMethods.isNullOrEmpty()) {
                     createAccount(email,password)
+                    //saveBasicUserData(email, nombreCompleto)
                 } else {
                     Toast.makeText(
                         baseContext,

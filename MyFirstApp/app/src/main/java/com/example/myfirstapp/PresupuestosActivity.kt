@@ -59,13 +59,11 @@ import java.util.GregorianCalendar
 
 
 class PresupuestosActivity : ComponentActivity() {
-    private val registrarGastos =
-        { startActivity(Intent(this, RegistrarGastosActivity::class.java)) }
-    private val historialGastos =
-        { startActivity(Intent(this, HistorialGastosActivity::class.java)) }
-    private val perfil = { startActivity(Intent(this, ProfileActivity::class.java)) }
-    private val presupuestos = { startActivity(Intent(this, PresupuestosActivity::class.java)) }
-
+    private val home = {startActivity(Intent(this, HomeActivity::class.java))}
+    private val registrarGastos = {startActivity(Intent(this, RegistrarGastosActivity::class.java))}
+    private val historialGastos = {startActivity(Intent(this, HistorialGastosActivity::class.java))}
+    private val perfil = {startActivity(Intent(this, ProfileActivity::class.java))}
+    private val presupuestos = {startActivity(Intent(this, PresupuestosActivity::class.java))}
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -97,7 +95,8 @@ class PresupuestosActivity : ComponentActivity() {
                                 registrarGastos = registrarGastos,
                                 perfil = perfil,
                                 historialGastos = historialGastos,
-                                presupuestos = presupuestos
+                                presupuestos = presupuestos,
+                                home = home
                             )
                         }
                     ) {
