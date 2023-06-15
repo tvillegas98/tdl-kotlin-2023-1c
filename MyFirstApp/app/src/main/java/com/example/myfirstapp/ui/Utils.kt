@@ -2,9 +2,7 @@ package com.example.myfirstapp.ui
 
 
 import android.content.ContentValues
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,12 +22,10 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.outlined.Fastfood
 import androidx.compose.material.icons.outlined.Flight
 import androidx.compose.material.icons.outlined.MedicalServices
-import androidx.compose.material.icons.outlined.Money
 import androidx.compose.material.icons.outlined.QuestionMark
 import androidx.compose.material.icons.outlined.Sell
 import androidx.compose.material.icons.outlined.ShoppingBag
@@ -65,10 +61,8 @@ val redColor = Color(0xFFF44336)
 val pinkColor = Color(0xFFFF0CFF)
 val orangeColor = Color(0xFFFF8F00)
 val whiteColor = Color(0xFFFFFFFF)
-val coloresPieChart = listOf<Color>(greenColor,blueColor,yellowColor, redColor, orangeColor, pinkColor)
+val coloresPieChart = listOf(greenColor,blueColor,yellowColor, redColor, orangeColor, pinkColor)
 
-@RequiresApi(Build.VERSION_CODES.M)
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StandardTextField(string: String, label: String, onValueChanged: (String) -> Unit, icon: ImageVector) {
     OutlinedTextField(
@@ -117,11 +111,11 @@ fun StandardIconButton(accion : () -> Unit, icon : ImageVector){
 }
 
 @Composable
-fun StandardBackButton(onBackClick: () -> Unit) {
-    androidx.compose.material.IconButton(onClick = onBackClick) {
+fun StandardTopIconButton(accion: () -> Unit, icon: ImageVector) {
+    IconButton(onClick = accion) {
         Icon(
-            imageVector = Icons.Default.ArrowBack,
-            contentDescription = "Back",
+            imageVector = icon,
+            contentDescription = null,
             tint = Color.Black,
             modifier = Modifier.size(24.dp)
         )

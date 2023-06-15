@@ -3,13 +3,11 @@ package com.example.myfirstapp
 import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,12 +17,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -47,14 +43,10 @@ import java.util.Date
 
 class RegistrarGastosActivity : ComponentActivity() {
     private val home = {startActivity(Intent(this, HomeActivity::class.java))}
-    private val registrarGastos = {startActivity(Intent(this, RegistrarGastosActivity::class.java))}
-    private val historialGastos = {startActivity(Intent(this, HistorialGastosActivity::class.java))}
     private val perfil = {startActivity(Intent(this, ProfileActivity::class.java))}
     private val presupuestos = {startActivity(Intent(this, PresupuestosActivity::class.java))}
 
-    @RequiresApi(Build.VERSION_CODES.M)
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -68,29 +60,26 @@ class RegistrarGastosActivity : ComponentActivity() {
                     Scaffold(
                         bottomBar = { StandardNavigationAppBar(
                             home=home,
-                            registrarGastos=registrarGastos,
                             perfil = perfil,
-                            historialGastos=historialGastos,
                             presupuestos = presupuestos
                         )
                         }
                     ) {
-                        registroDeGasto()
+                        RegistroDeGasto()
                     }
                 }
             }
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     @Composable
-    fun registroDeGasto() {
+    fun RegistroDeGasto() {
         var categoria:      String by remember {mutableStateOf("")}
         var titulo:         String by remember { mutableStateOf("") }
         var monto:          String by remember { mutableStateOf("") }
         var observaciones:  String by remember { mutableStateOf("") }
         var fuente:         String by remember { mutableStateOf("") }
-        val currentFirebaseUser = Firebase.auth.currentUser
+//        val currentFirebaseUser = Firebase.auth.currentUser
 
         //es compartido ??
         //se repetira ?? (cada semana o mes)
@@ -109,10 +98,10 @@ class RegistrarGastosActivity : ComponentActivity() {
                 .background(color = colorResource(id = R.color.PrimaryColor))
         ) {
             DropdownMenu(
-                "Categoría",
-                categoria,
-                categorias,
-                { categoria = it }
+                asuntoTextField = "Categoría",
+                asunto=categoria,
+                opciones=categorias,
+                onValueChanged = { categoria = it }
             )
             StandardTextField(
                 string = titulo,
@@ -133,14 +122,14 @@ class RegistrarGastosActivity : ComponentActivity() {
                 icon = Icons.Default.Edit
             )
             DropdownMenu(
-                "Fuente",
-                fuente,
-                fuentes,
-                { fuente = it }
+                asuntoTextField = "Fuente",
+                asunto =  fuente,
+                opciones=fuentes,
+                onValueChanged = { fuente = it }
             )
 
             //TextField(asunto:String, onValueChange = {})
-            crearGastoButton(
+            CrearGastoButton(
                 categoria       = categoria,
                 titulo          = titulo,
                 monto           = monto,
@@ -150,23 +139,22 @@ class RegistrarGastosActivity : ComponentActivity() {
         }
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    fun TextField(
-        asuntoTextField: String,
-        asunto: String,
-        onValueChanged: (String) -> Unit
-    ) {
-        TextField(
-            value = asunto,
-            onValueChange = { newValue -> onValueChanged(newValue) },
-            label = { Text("$asuntoTextField") }
-        )
-    }
+//    @Composable
+//    fun TextField(
+//        asuntoTextField: String,
+//        asunto: String,
+//        onValueChanged: (String) -> Unit
+//    ) {
+//        TextField(
+//            value = asunto,
+//            onValueChange = { newValue -> onValueChanged(newValue) },
+//            label = { Text("$asuntoTextField") }
+//        )
+//    }
 
 
     @Composable
-    fun crearGastoButton(
+    fun CrearGastoButton(
         categoria: String,
         titulo: String,
         monto: String,
@@ -198,7 +186,7 @@ class RegistrarGastosActivity : ComponentActivity() {
                             Toast.LENGTH_SHORT,
                         ).show()
 
-                        incrementarGastosEnPresupuesto(categoria, monto, gasto.get("userUID").toString())
+                        incrementarGastosEnPresupuesto(categoria, monto, gasto["userUID"].toString())
 
                         startActivity(Intent(this, HistorialGastosActivity::class.java))
                     }
@@ -214,7 +202,7 @@ class RegistrarGastosActivity : ComponentActivity() {
     }
 
     private fun incrementarGastosEnPresupuesto(categoria: String, monto: String, userUID: String){
-        var monto = monto.toDouble()
+        val monto = monto.toDouble()
         val db = Firebase.firestore
 
         db.collection("presupuestos")

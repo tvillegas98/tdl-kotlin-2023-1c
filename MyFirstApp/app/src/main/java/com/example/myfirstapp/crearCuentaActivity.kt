@@ -1,15 +1,12 @@
 package com.example.myfirstapp
 
 import android.annotation.SuppressLint
-import android.content.ContentValues
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -34,12 +31,7 @@ import com.example.myfirstapp.ui.PasswordTextField
 import com.example.myfirstapp.ui.StandardTextField
 import com.example.myfirstapp.ui.StandardButton
 import com.example.myfirstapp.ui.StandardTopAppBar
-import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
-import java.util.Date
 
 class CrearCuentaActivity : ComponentActivity() {
 
@@ -47,7 +39,6 @@ class CrearCuentaActivity : ComponentActivity() {
     private lateinit var auth: FirebaseAuth
     // [END declare_auth]
 
-    @RequiresApi(Build.VERSION_CODES.M)
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter",
         "UnusedMaterialScaffoldPaddingParameter"
     )
@@ -68,15 +59,14 @@ class CrearCuentaActivity : ComponentActivity() {
                             )
                         }
                     ) {
-                        askForUserData()
+                        AskForUserData()
                     }
                 }
             }
         }
     }
-    @RequiresApi(Build.VERSION_CODES.M)
     @Composable
-    private fun askForUserData() {
+    private fun AskForUserData() {
         var email by remember { mutableStateOf("") }
         var password by rememberSaveable { mutableStateOf("") }
         var nombre by rememberSaveable { mutableStateOf("") }
@@ -93,14 +83,14 @@ class CrearCuentaActivity : ComponentActivity() {
             StandardTextField(string = apellido, label ="Apellido", onValueChanged = { apellido = it }, icon = Icons.Default.Person)
             StandardTextField(string = email, label ="Email",onValueChanged = { email = it }, icon=Icons.Default.Email)
             PasswordTextField(password = password, onValueChanged = { password = it })
-            createAccountButton(email = email, password = password, nombreCompleto = "$nombre $apellido")
+            CreateAccountButton(email = email, password = password, nombreCompleto = "$nombre $apellido")
         }
 
     }
 
 
     @Composable
-    fun createAccountButton(email: String, password: String, nombreCompleto: String) {
+    fun CreateAccountButton(email: String, password: String, nombreCompleto: String) {
         StandardButton(onClick = { verifyAccount(email, password, nombreCompleto) }, label = "Crear Usuario")
     }
 
@@ -137,8 +127,7 @@ class CrearCuentaActivity : ComponentActivity() {
                 if (task.isSuccessful) {
                     // Sign in success, update UI with the signed-in user's information
                     Log.d(TAG, "createUserWithEmail:success")
-                    val user = auth.currentUser
-                    startActivity(Intent(this, RegistrarGastosActivity::class.java))
+                    startActivity(Intent(this, HomeActivity::class.java))
                 } else {
                     // If sign in fails, display a message to the user.
                     Log.w(TAG, "createUserWithEmail:failure", task.exception)

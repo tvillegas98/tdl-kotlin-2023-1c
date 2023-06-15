@@ -50,9 +50,7 @@ class HomeActivity : ComponentActivity() {
                     Scaffold(
                         bottomBar = { StandardNavigationAppBar(
                             home=home,
-                            registrarGastos=registrarGastos,
                             perfil = perfil,
-                            historialGastos=historialGastos,
                             presupuestos = presupuestos )
                         },
                         modifier = Modifier
@@ -118,7 +116,7 @@ class HomeActivity : ComponentActivity() {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         CategoryIconBox(categoria, indice)
-                        Text("$categoria")
+                        Text(categoria)
                         Text("$$monto")
                     }
                 }

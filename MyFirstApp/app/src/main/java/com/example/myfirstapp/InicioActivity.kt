@@ -40,7 +40,6 @@ class InicioActivity : ComponentActivity() {
     private lateinit var auth: FirebaseAuth
     // [END declare_auth]
 
-    @RequiresApi(Build.VERSION_CODES.M)
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -110,7 +109,7 @@ class InicioActivity : ComponentActivity() {
 
     private fun redirigir() {
         //TODO DESCOMENTAR CUANDO ESTE TODO HECHO
-        //startActivity(Intent(this, ProfileActivity::class.java))
+        //startActivity(Intent(this, HomeActivity::class.java))
     }
 
     companion object {
@@ -118,7 +117,6 @@ class InicioActivity : ComponentActivity() {
     }
 
     //Prueba de integración con FB
-    @RequiresApi(Build.VERSION_CODES.M)
     @Composable
     fun UserLogIn() {
         //TODO DES-HARDCODEAR

@@ -43,8 +43,6 @@ import java.util.GregorianCalendar
 
 class PresupuestosActivity : ComponentActivity() {
     private val home = {startActivity(Intent(this, HomeActivity::class.java))}
-    private val registrarGastos = {startActivity(Intent(this, RegistrarGastosActivity::class.java))}
-    private val historialGastos = {startActivity(Intent(this, HistorialGastosActivity::class.java))}
     private val perfil = {startActivity(Intent(this, ProfileActivity::class.java))}
     private val presupuestos = {startActivity(Intent(this, PresupuestosActivity::class.java))}
 
@@ -62,21 +60,19 @@ class PresupuestosActivity : ComponentActivity() {
                         bottomBar = {
                             StandardNavigationAppBar(
                                 home=home,
-                                registrarGastos=registrarGastos,
                                 perfil = perfil,
-                                historialGastos=historialGastos,
                                 presupuestos = presupuestos
                             )
                         }
                     ) {
-                        registrarPresupuesto()
+                        RegistrarPresupuesto()
                     }
                 }
             }
         }
     }
     @Composable
-    fun registrarPresupuesto(){
+    fun RegistrarPresupuesto(){
         var categoria:      String by remember {mutableStateOf("")}
         var montoBase: String by remember {mutableStateOf("")}
         val categorias: MutableList<String> = mutableListOf()
@@ -110,7 +106,7 @@ class PresupuestosActivity : ComponentActivity() {
                     onValueChanged = {montoBase = it},
                     icon = Icons.Default.ShoppingCart
                 )
-                crearPresupuestoButton(
+                CrearPresupuestoButton(
                     categoria = categoria,
                     montoBase = montoBase,
                     userUID = currentFirebaseUser!!.uid
@@ -119,8 +115,9 @@ class PresupuestosActivity : ComponentActivity() {
         }
     }
 
+    @SuppressLint("SimpleDateFormat")
     @Composable
-    fun crearPresupuestoButton(
+    fun CrearPresupuestoButton(
         categoria: String,
         montoBase: String,
         userUID: String

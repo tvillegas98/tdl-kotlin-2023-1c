@@ -19,8 +19,6 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.content.ContextCompat
-import com.example.myfirstapp.R
 import com.example.myfirstapp.ui.coloresPieChart
 import com.example.myfirstapp.ui.whiteColor
 import com.github.mikephil.charting.charts.PieChart
