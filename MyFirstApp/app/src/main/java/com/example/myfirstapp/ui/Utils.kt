@@ -110,7 +110,7 @@ fun StandardIconButton(accion : () -> Unit, icon : ImageVector){
         Icon(
             imageVector = icon,
             contentDescription = "",
-            tint = Color.White,
+            tint = colorResource(id = R.color.PrimaryColor),
             modifier = Modifier.size(35.dp)
         )
     }

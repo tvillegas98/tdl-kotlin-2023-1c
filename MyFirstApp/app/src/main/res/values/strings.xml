@@ -24,4 +24,5 @@
     <string name="personal_card_mail">santiago.ruiz.sugliani@gmail.com</string>
     <string name="title_activity_profile">ProfileActivity</string>
     <string name="title_activity_personal_data">PersonalDataActivity</string>
+    <string name="title_activity_contacts">ContactsActivity</string>
 </resources>
