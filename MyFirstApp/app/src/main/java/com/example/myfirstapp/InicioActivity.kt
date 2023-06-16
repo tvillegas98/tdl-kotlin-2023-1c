@@ -120,7 +120,7 @@ class InicioActivity : ComponentActivity() {
     @Composable
     fun UserLogIn() {
         //TODO DES-HARDCODEAR
-        var email by remember { mutableStateOf("santiago.ruiz.sugliani@gmail.com") }
+        var email by remember { mutableStateOf("actualizado@gmail.com") }
         var password by rememberSaveable { mutableStateOf("abcdef123456") }
 
         Column(

@@ -35,13 +35,13 @@ import java.util.ArrayList
 // name and value.
 data class PieChartData(
     var browserName: String?,
-    var value: Float?
+    var value: Double?
 )
 
 // on below line we are creating a
 // pie chart function on below line.
 @Composable
-fun DrawPieChart(gastosPorCatgoria: Map<String, Float>) {
+fun DrawPieChart(gastosPorCatgoria: Map<String, Double>) {
     val dataPieChart = convertToPieChartData(gastosPorCatgoria)
 
     // on below line we are again creating a column
@@ -138,7 +138,7 @@ fun DrawPieChart(gastosPorCatgoria: Map<String, Float>) {
     }
 }
 
-fun convertToPieChartData(gastosPorCatgoria: Map<String, Float>): List<PieChartData> {
+fun convertToPieChartData(gastosPorCatgoria: Map<String, Double>): List<PieChartData> {
     val listaPieChartData = mutableListOf<PieChartData>()
 
     val sumaTotal = gastosPorCatgoria.values.sum()
@@ -166,7 +166,7 @@ fun updatePieChartWithData(
     // passing data from list into entries list.
     for (i in data.indices) {
         val item = data[i]
-        entries.add(PieEntry(item.value ?: 0.toFloat(), item.browserName ?: ""))
+        entries.add(PieEntry(item.value?.toFloat() ?: 0.toFloat(), item.browserName ?: ""))
     }
 
     // on below line we are creating

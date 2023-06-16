@@ -3,6 +3,7 @@ package com.example.myfirstapp
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -26,6 +27,7 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FilterAlt
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -41,12 +43,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-//import com.example.myfirstapp.ui.DropdownMenu
 import com.example.myfirstapp.ui.StandardNavigationAppBar
 import com.example.myfirstapp.ui.StandardTopAppBar
 import com.example.myfirstapp.ui.obtenerDocumentos
 import com.example.myfirstapp.ui.theme.MyFirstAppTheme
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import me.saket.cascade.CascadeDropdownMenu
@@ -58,10 +60,13 @@ class HistorialGastosActivity : ComponentActivity() {
     private val home = {startActivity(Intent(this, HomeActivity::class.java))}
     private val perfil = {startActivity(Intent(this, ProfileActivity::class.java))}
     private val presupuestos = {startActivity(Intent(this, PresupuestosActivity::class.java))}
+    private val historialGastos = {startActivity(Intent(this, HistorialGastosActivity::class.java))}
 
     private var filtroCategoria : String? = null
     private var filtroFuente : String? = null
     private var busquedaTitulo : String? = null
+    private var ordenarPor : String? = null
+    private var ordenAscendente : Boolean = false
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,6 +75,9 @@ class HistorialGastosActivity : ComponentActivity() {
         filtroCategoria = intent.getStringExtra("categoria")
         filtroFuente = intent.getStringExtra("fuente")
         busquedaTitulo = intent.getStringExtra("titulo")
+        ordenarPor = intent.getStringExtra("orderBy")
+        ordenAscendente = intent.getBooleanExtra("ascOrder", false)
+
 
         setContent {
             MyFirstAppTheme {
@@ -116,9 +124,12 @@ class HistorialGastosActivity : ComponentActivity() {
                 collectionRef = collectionRef.whereEqualTo("source", filtroFuente)
             }
             if (busquedaTitulo != null) {
-                collectionRef = collectionRef.whereEqualTo("title", busquedaTitulo)
-                //TODO HACER QUE SIMULE UN 'LIKE'
-//                collectionRef = collectionRef.whereGreaterThanOrEqualTo("title", busquedaTitulo!!).whereLessThan("title",busquedaTitulo+'\uf8ff')
+                // Simula un like pero solo si el texto empieza con dicha palabra, no hay algo mejor que se pueda hacer con firebase
+                collectionRef = collectionRef.whereGreaterThanOrEqualTo("title", busquedaTitulo!!).whereLessThanOrEqualTo("title",busquedaTitulo+'\uf8ff')
+            }
+            if (ordenarPor != null) {
+                //TODO VER POR QUE NO FUNCIONA COMO DEBERIA
+                collectionRef = collectionRef.orderBy(ordenarPor!!, if(ordenAscendente) Query.Direction.ASCENDING else Query.Direction.DESCENDING)
             }
 
             collectionRef.get()
@@ -132,7 +143,7 @@ class HistorialGastosActivity : ComponentActivity() {
                         document.getString("category")?.let {
                             gastoList.add("Categoria: $it")
                         }
-                        document.getString("amount")?.let {
+                        document.getDouble("amount")?.let {
                             gastoList.add("Precio: $$it")
                         }
                         document.getDate("date")?.let { date ->
@@ -174,15 +185,6 @@ class HistorialGastosActivity : ComponentActivity() {
 
     @Composable
     private fun Filtros() {
-        var busqueda:      String by remember {mutableStateOf("")}
-        val filtrosLista : MutableList<String> = mutableListOf("Categoria","Fuente")
-        var expanded by remember { mutableStateOf(false) }
-
-        val fuentes : MutableList<String> = mutableListOf()
-        val categorias : MutableList<String> = mutableListOf()
-        obtenerDocumentos(nombreColeccion = "sources", lista=fuentes)
-        obtenerDocumentos(nombreColeccion = "categories", lista=categorias)
-
         Row (
             modifier= Modifier
                 .fillMaxWidth()
@@ -191,69 +193,177 @@ class HistorialGastosActivity : ComponentActivity() {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            IconButton(onClick = { expanded = true }) {
-                Icon(
-                    Icons.Default.FilterAlt,
-                    contentDescription = "Icono de filtro",
-                    modifier = Modifier.size(35.dp)
-                )
-            }
-
-            val state = rememberCascadeState()
-            CascadeDropdownMenu(
-                state = state,
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
-            ) {
-                filtrosLista.forEach {filtro ->
-                    DropdownMenuItem(
-                        text = { Text(text = filtro) },
-                        children = {
-                            if (filtro == "Fuente") {
-                                fuentes.forEach {subFiltro ->
-                                    DropdownMenuItem(
-                                        text = { Text(text = subFiltro) },
-                                        onClick = aplicarFiltro(filtro, subFiltro)
-                                    )
-                                }
-                            }
-                            else {
-                                categorias.forEach {subFiltro ->
-                                    DropdownMenuItem(
-                                        text = { Text(text = subFiltro) },
-                                        onClick = aplicarFiltro(filtro, subFiltro)
-                                    )
-                                }
-                            }
-                        }
-                    )
-                }
-            }
-            
-            OutlinedTextField(
-                value = busqueda,
-                onValueChange = { busqueda = it },
-                label = { Text("Buscar Titulo") },
-                modifier = Modifier.background(color = colorResource(id = R.color.white)),
-                trailingIcon = {
-                    IconButton(
-                        // Realiza la búsqueda en Firebase aquí usando el valor actual de "busqueda"
-                        onClick = buscarTitulo(busqueda)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = "Buscar",
-                            tint = Color.Gray
-                        )
-                    }
-                },
-                keyboardOptions = KeyboardOptions(
-                    imeAction = ImeAction.Send // Define el tipo de acción del botón "Enter"
-                )
-            )
+            IconFiltros()
+            IconOrden()
+            BarraBusqueda()
         }
 
     }
+
+    @Composable
+    private fun BarraBusqueda() {
+        var busqueda:      String by remember {mutableStateOf("")}
+
+        OutlinedTextField(
+            value = busqueda,
+            onValueChange = { busqueda = it },
+            label = { Text("Buscar Titulo") },
+            modifier = Modifier.background(color = colorResource(id = R.color.white)),
+            trailingIcon = {
+                IconButton(
+                    onClick = buscarTitulo(busqueda)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Buscar",
+                        tint = Color.Gray
+                    )
+                }
+            },
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Send // Define el tipo de acción del botón "Enter"
+            )
+        )
+    }
+
+    @Composable
+    private fun IconFiltros() {
+        val filtrosLista : MutableList<String> = mutableListOf("Categoria","Fuente")
+        var expanded by remember { mutableStateOf(false) }
+
+        val fuentes : MutableList<String> = mutableListOf()
+        val categorias : MutableList<String> = mutableListOf()
+        obtenerDocumentos(nombreColeccion = "sources", lista=fuentes)
+        obtenerDocumentos(nombreColeccion = "categories", lista=categorias)
+
+        IconButton(onClick = { expanded = true }) {
+            Icon(
+                Icons.Default.FilterAlt,
+                contentDescription = "Icono de filtro",
+                modifier = Modifier.size(35.dp)
+            )
+        }
+
+        val state = rememberCascadeState()
+        CascadeDropdownMenu(
+            state = state,
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            // Si hay algun filtro actualmente agrego una opcion para eliminarlos
+            if (filtroFuente != null || filtroCategoria != null) {
+                DropdownMenuItem(
+                    text = { Text(text = "Borrar Filtros") },
+                    onClick = historialGastos
+                )
+            }
+
+            filtrosLista.forEach { filtro ->
+                DropdownMenuItem(
+                    text = { Text(text = filtro) },
+                    children = {
+                        if (filtro == "Fuente") {
+                            fuentes.forEach { subFiltro ->
+                                DropdownMenuItem(
+                                    text = { Text(text = subFiltro) },
+                                    onClick = aplicarFiltro(filtro, subFiltro)
+                                )
+                            }
+                        } else {
+                            categorias.forEach { subFiltro ->
+                                DropdownMenuItem(
+                                    text = { Text(text = subFiltro) },
+                                    onClick = aplicarFiltro(filtro, subFiltro)
+                                )
+                            }
+                        }
+                    }
+                )
+            }
+        }
+    }
+    @Composable
+    private fun IconOrden() {
+        var expanded by remember { mutableStateOf(false) }
+
+        // TODO VER POR QUE NO SE PUEDE HACER DINAMICO
+//        val campos : List<String> = obtenerCamposGastos()
+
+        val campos : Map<String, String> =
+            mapOf(Pair("Titulo", "title"), Pair("Categoria","category"),
+                Pair("Fecha","date"), Pair("Fuente","source"), Pair("Monto","amount"))
+
+        IconButton(onClick = { expanded = true }) {
+            Icon(
+                Icons.Default.FilterList,
+                contentDescription = "Icono de filtro",
+                modifier = Modifier.size(35.dp)
+            )
+        }
+
+        val state = rememberCascadeState()
+        CascadeDropdownMenu(
+            state = state,
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            if (ordenarPor != null) {
+                DropdownMenuItem(
+                    text = { Text(text = "Borrar Orden") },
+                    onClick = historialGastos
+                )
+            }
+            campos.forEach { (campoTraducion, campo) ->
+                DropdownMenuItem(
+                    text = { Text(text = campoTraducion) },
+                    children = {
+                        DropdownMenuItem(
+                            text = { Text(text = "Ascendente") },
+                            onClick = aplicarOrden(campo=campo,ascendente = true)
+                        )
+                        DropdownMenuItem(
+                            text = { Text(text = "Descendente") },
+                            onClick = aplicarOrden(campo=campo, ascendente = false)
+                        )
+                    }
+                )
+            }
+        }
+    }
+
+    private fun aplicarOrden(campo: String, ascendente: Boolean): () -> Unit {
+        val intent = Intent(this, HistorialGastosActivity::class.java)
+
+        intent.putExtra("orderBy", campo)
+        intent.putExtra("orderType", ascendente)
+        if (filtroFuente != null) {
+            intent.putExtra("fuente", filtroFuente)
+        }
+        if (filtroCategoria != null) {
+            intent.putExtra("categoria", filtroCategoria)
+        }
+        return {startActivity(intent)}
+    }
+
+//    private fun obtenerCamposGastos(): List<String> {
+//        val db = Firebase.firestore
+//        val collectionRef = db.collection("gastos")
+//        val res : MutableList<String> = mutableListOf()
+//
+//
+//        collectionRef.get()
+//            .addOnSuccessListener { documents ->
+//                for (document in documents) {
+//                    if (document.id != "Observaciones"){
+//                        res.add(document.id)
+//                    }
+//                }
+//            }
+//            .addOnFailureListener { exception ->
+//                println("Error al obtener los documentos: $exception")
+//            }
+//        return res
+//    }
 
     private fun aplicarFiltro(tipoFiltro: String, subFiltro: String): () -> Unit  {
         val intent = Intent(this, HistorialGastosActivity::class.java)
@@ -288,17 +398,27 @@ class HistorialGastosActivity : ComponentActivity() {
 
     @Composable
     private fun ListarHistorial(gastos: MutableState<List<List<String>>>) {
-        gastos.value.forEach { lista ->
+        if (gastos.value.isEmpty()) {
             Card(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
+                    .fillMaxSize()
+                    .padding(30.dp)
             ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
+                Text(text = "No hay gastos registrados")
+            }
+        } else {
+            gastos.value.forEach { lista ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
                 ) {
-                    lista.forEach { item ->
-                        Text(text = item)
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        lista.forEach { item ->
+                            Text(text = item)
+                        }
                     }
                 }
             }

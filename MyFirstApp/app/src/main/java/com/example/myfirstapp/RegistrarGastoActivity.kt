@@ -76,7 +76,7 @@ class RegistrarGastosActivity : ComponentActivity() {
     fun RegistroDeGasto() {
         var categoria:      String by remember {mutableStateOf("")}
         var titulo:         String by remember { mutableStateOf("") }
-        var monto:          String by remember { mutableStateOf("") }
+        var monto:          Double by remember { mutableStateOf(0.00) }
         var observaciones:  String by remember { mutableStateOf("") }
         var fuente:         String by remember { mutableStateOf("") }
 //        val currentFirebaseUser = Firebase.auth.currentUser
@@ -110,9 +110,9 @@ class RegistrarGastosActivity : ComponentActivity() {
                 icon = Icons.Default.Edit
             )
             StandardNumberField(
-                string = monto,
+                string = monto.toString(),
                 label = "Monto",
-                onValueChanged = {monto = it},
+                onValueChanged = {monto = it.toDouble()},
                 icon = Icons.Default.ShoppingCart
             )
             StandardTextField(
@@ -157,7 +157,7 @@ class RegistrarGastosActivity : ComponentActivity() {
     fun CrearGastoButton(
         categoria: String,
         titulo: String,
-        monto: String,
+        monto: Double,
         observaciones: String,
         fuente: String
     ) {
@@ -201,8 +201,7 @@ class RegistrarGastosActivity : ComponentActivity() {
         }
     }
 
-    private fun incrementarGastosEnPresupuesto(categoria: String, monto: String, userUID: String){
-        val monto = monto.toDouble()
+    private fun incrementarGastosEnPresupuesto(categoria: String, monto: Double, userUID: String){
         val db = Firebase.firestore
 
         db.collection("presupuestos")
