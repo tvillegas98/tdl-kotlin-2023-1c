@@ -296,15 +296,11 @@ fun actualizarPresupuestos() {
         presupuesto.category
     }
 
-    Log.w(ContentValues.TAG, "A ver que verga imprime ${presupuestosAgrupados}")
-
     val fechaActual = LocalDate.now().toString()
 
     for((_category, presupuestos) in presupuestosAgrupados){
-        Log.w(ContentValues.TAG, "Este més existe algo? ${presupuestos}")
         if(!existePresupuestoEsteMes(presupuestos, fechaActual)){
             val presupuestoMasReciente = presupuestos.maxWith(compareBy({ it.creationDate[YEAR]}, { it.creationDate[MONTH] }))
-            Log.w(ContentValues.TAG, "El mas reciente? ${presupuestoMasReciente}")
             crearNuevoPresupuesto(presupuestoMasReciente);
         }
     }
