@@ -1,6 +1,6 @@
 package com.example.myfirstapp
 
-import DrawPieChart
+import com.example.myfirstapp.ui.DrawPieChart
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
@@ -94,7 +94,7 @@ class HomeActivity : ComponentActivity() {
 
     @Composable
     private fun DrawSummary(gastosPorCategoria: Map<String, Float>) {
-        var indice : Int = 0
+        var indice = 0
         Column (
             modifier = Modifier
                 .fillMaxSize()
@@ -118,7 +118,7 @@ class HomeActivity : ComponentActivity() {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         CategoryIconBox(categoria, indice)
-                        Text("$categoria")
+                        Text(categoria)
                         Text("$$monto")
                     }
                 }

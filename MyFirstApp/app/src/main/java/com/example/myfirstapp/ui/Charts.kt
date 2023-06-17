@@ -1,3 +1,5 @@
+package com.example.myfirstapp.ui
+
 import android.graphics.Typeface
 import android.view.ViewGroup
 import android.widget.LinearLayout
@@ -19,16 +21,11 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.content.ContextCompat
-import com.example.myfirstapp.R
-import com.example.myfirstapp.ui.coloresPieChart
-import com.example.myfirstapp.ui.whiteColor
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.components.Legend
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
-import java.util.ArrayList
 
 // on below line we are adding different colors.
 
@@ -162,7 +159,7 @@ fun updatePieChartWithData(
 ) {
     // on below line we are creating
     // array list for the entries.
-    var entries = ArrayList<PieEntry>()
+    val entries = ArrayList<PieEntry>()
 
     // on below line we are running for loop for
     // passing data from list into entries list.

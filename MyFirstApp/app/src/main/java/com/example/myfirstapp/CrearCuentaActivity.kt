@@ -1,7 +1,6 @@
 package com.example.myfirstapp
 
 import android.annotation.SuppressLint
-import android.content.ContentValues
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -29,17 +28,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
-import com.example.myfirstapp.ui.theme.MyFirstAppTheme
 import com.example.myfirstapp.ui.PasswordTextField
-import com.example.myfirstapp.ui.StandardTextField
 import com.example.myfirstapp.ui.StandardButton
+import com.example.myfirstapp.ui.StandardTextField
 import com.example.myfirstapp.ui.StandardTopAppBar
-import com.google.firebase.Timestamp
+import com.example.myfirstapp.ui.theme.MyFirstAppTheme
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
-import java.util.Date
 
 class CrearCuentaActivity : ComponentActivity() {
 
@@ -68,7 +62,7 @@ class CrearCuentaActivity : ComponentActivity() {
                             )
                         }
                     ) {
-                        askForUserData()
+                        AskForUserData()
                     }
                 }
             }
@@ -76,7 +70,7 @@ class CrearCuentaActivity : ComponentActivity() {
     }
     @RequiresApi(Build.VERSION_CODES.M)
     @Composable
-    private fun askForUserData() {
+    private fun AskForUserData() {
         var email by remember { mutableStateOf("") }
         var password by rememberSaveable { mutableStateOf("") }
         var nombre by rememberSaveable { mutableStateOf("") }
@@ -93,18 +87,18 @@ class CrearCuentaActivity : ComponentActivity() {
             StandardTextField(string = apellido, label ="Apellido", onValueChanged = { apellido = it }, icon = Icons.Default.Person)
             StandardTextField(string = email, label ="Email",onValueChanged = { email = it }, icon=Icons.Default.Email)
             PasswordTextField(password = password, onValueChanged = { password = it })
-            createAccountButton(email = email, password = password, nombreCompleto = "$nombre $apellido")
+            CreateAccountButton(email = email, password = password)
         }
 
     }
 
 
     @Composable
-    fun createAccountButton(email: String, password: String, nombreCompleto: String) {
-        StandardButton(onClick = { verifyAccount(email, password, nombreCompleto) }, label = "Crear Usuario")
+    fun CreateAccountButton(email: String, password: String) {
+        StandardButton(onClick = { verifyAccount(email, password) }, label = "Crear Usuario")
     }
 
-    private fun verifyAccount(email:String, password:String, nombreCompleto:String) {
+    private fun verifyAccount(email: String, password: String) {
         //Verifico que el email no este registrado a otra cuenta
         auth.fetchSignInMethodsForEmail(email)
             .addOnCompleteListener { task ->
@@ -137,7 +131,7 @@ class CrearCuentaActivity : ComponentActivity() {
                 if (task.isSuccessful) {
                     // Sign in success, update UI with the signed-in user's information
                     Log.d(TAG, "createUserWithEmail:success")
-                    val user = auth.currentUser
+                    auth.currentUser
                     startActivity(Intent(this, RegistrarGastosActivity::class.java))
                 } else {
                     // If sign in fails, display a message to the user.

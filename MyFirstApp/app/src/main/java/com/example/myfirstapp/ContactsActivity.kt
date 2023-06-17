@@ -11,21 +11,30 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
-import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.outlined.Block
+import androidx.compose.material.icons.outlined.Cancel
+import androidx.compose.material.icons.outlined.Diversity1
+import androidx.compose.material.icons.outlined.Done
+import androidx.compose.material.icons.outlined.Explore
+import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material3.CardDefaults.shape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -54,8 +63,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.util.Date
 
+enum class RequestType {
+    CONTACTS,
+    OUTGOING,
+    INCOMING
+}
+@Suppress("UNUSED_EXPRESSION")
 class ContactsActivity : ComponentActivity() {
-    private val perfil          = {startActivity(Intent(this, ProfileActivity::class.java))}
+    private val perfil  = {startActivity(Intent(this, ProfileActivity::class.java))}
 
     @RequiresApi(Build.VERSION_CODES.M)
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -83,6 +98,7 @@ class ContactsActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.M)
     @Composable
     fun ContactsLayer() {
+        var requestType by remember { mutableStateOf(RequestType.CONTACTS) }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -92,7 +108,23 @@ class ContactsActivity : ComponentActivity() {
             verticalArrangement = Arrangement.Center,
         ) {
             AddNewContactSection()
-            ContactsSection()
+            ContactsButtonsSection { newRequestType -> requestType = newRequestType }
+            ContactsSection(requestType)
+        }
+    }
+
+    @Composable
+    fun ContactsButtonsSection(onRequestTypeChange: (RequestType) -> Unit) {
+        Row (
+            modifier = Modifier.padding(0.dp, 2.dp, 0.dp, 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            StandardIconButton(accion = { onRequestTypeChange(RequestType.CONTACTS) }, icon = Icons.Outlined.Diversity1, iconColorTintId = R.color.black, iconBackgroundColorId = R.color.ThirdColor )
+            Spacer(modifier = Modifier.width(8.dp))
+            StandardIconButton(accion = { onRequestTypeChange(RequestType.INCOMING) }, icon = Icons.Outlined.Notifications, iconColorTintId = R.color.black, iconBackgroundColorId = R.color.ThirdColor )
+            Spacer(modifier = Modifier.width(8.dp))
+            StandardIconButton(accion = { onRequestTypeChange(RequestType.OUTGOING) }, icon = Icons.Outlined.Explore, iconColorTintId = R.color.black, iconBackgroundColorId = R.color.ThirdColor )
         }
     }
 
@@ -105,7 +137,8 @@ class ContactsActivity : ComponentActivity() {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
-                .background(color = colorResource(id = R.color.ThirdColor))
+                .border(2.dp, colorResource(id = R.color.black), shape)
+                .background(color = colorResource(id = R.color.ThirdColor), shape = shape)
         ) {
             Column(
                 modifier = Modifier.padding(24.dp),
@@ -119,8 +152,8 @@ class ContactsActivity : ComponentActivity() {
                     onValueChanged = { newContactEmail = it },
                     icon = Icons.Default.Email
                 )
+                Spacer(modifier = Modifier.height(6.dp))
                 SendContactRequestButton(newContactEmail)
-                //StandardIconButton({sendContactRequest(newContactEmail)}, Icons.Filled.Send)
             }
         }
     }
@@ -135,26 +168,21 @@ class ContactsActivity : ComponentActivity() {
                     sendContactRequest(newContactEmail)
                 }
             },
-            icon = Icons.Filled.Send
+            icon = Icons.Filled.Send,
+            iconColorTintId = R.color.SecondColor
         )
     }
 
     // Devuelve el Id del usuario que posee dicho email en sus datos.
     suspend fun getIdByEmail(email : String): String {
         val db  = Firebase.firestore
-        var id  = ""
+        val id  = ""
 
         try {
             val querySnapshot = db.collection("usersData").whereEqualTo("email", email).get().await()
 
             if (!querySnapshot.isEmpty) {
                 val document = querySnapshot.documents.first()
-                id = document.getString("userId").toString()
-                Toast.makeText(
-                    baseContext,
-                    id,
-                    Toast.LENGTH_SHORT,
-                ).show()
                 return document.getString("userId").toString()
             } else {
                 Toast.makeText(
@@ -225,26 +253,45 @@ class ContactsActivity : ComponentActivity() {
 
     // Invoca las funciones necesarias para el circuito del envio de solicitudes de contacto
     private suspend fun sendContactRequest(requestedEmail : String) {
+        val requestedId     = getIdByEmail(requestedEmail)
         val requesterId     = Firebase.auth.currentUser!!.uid
         val requesterEmail  = Firebase.auth.currentUser!!.email
-        val requestedId     = getIdByEmail(requestedEmail)
 
-
-        registerOutgoingContactRequest(requestedEmail, requesterId, requestedId)
-        if (requesterEmail != null) {
+        if (requestedId == "" || requesterEmail == null) {
+            return
+        } else {
+            registerOutgoingContactRequest(requestedEmail, requesterId, requestedId)
             registerIncomingContactRequest(requesterEmail, requesterId, requestedId)
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
     @Composable
-    fun ContactsSection() {
+    fun ContactsSection(requestType: RequestType) {
         var contacts: List<String> by remember { mutableStateOf(emptyList()) }
 
-        LaunchedEffect(Unit) {
-            getContacts { fetchedContacts ->
-                contacts = fetchedContacts.sorted()
+        LaunchedEffect(requestType) {
+            contacts = emptyList()
+            when (requestType) {
+                RequestType.CONTACTS -> {
+                    getContacts { fetchedContacts ->
+                        contacts = fetchedContacts.sorted()
+                    }
+                }
+
+                RequestType.INCOMING -> {
+                    getIncomingRequests { fetchedRequests ->
+                        contacts = fetchedRequests.sorted()
+                    }
+                }
+
+                RequestType.OUTGOING -> {
+                    getOutgoingRequests { fetchedRequests ->
+                        contacts = fetchedRequests.sorted()
+                    }
+                }
             }
+
         }
 
         Column (
@@ -253,7 +300,6 @@ class ContactsActivity : ComponentActivity() {
                 .verticalScroll(rememberScrollState(), enabled = true)
                 .padding(bottom = 80.dp)
         ) {
-            Text(text = "Your contacts")
             contacts.forEach { firstName ->
                 Card(
                     modifier = Modifier
@@ -266,19 +312,87 @@ class ContactsActivity : ComponentActivity() {
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(15.dp),
-                        horizontalArrangement = Arrangement.Center,
+                        horizontalArrangement = Arrangement.SpaceAround,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Contacts,
-                            contentDescription = null,
-                            tint = colorResource(id = R.color.ThirdColor)
-                        )
                         Text(firstName)
+
+                        // Mostramos distintos botones en función de lo que mostramos
+                        when (requestType) {
+                            RequestType.INCOMING -> {
+                                StandardIconButton(accion = {  }, icon = Icons.Outlined.Done, iconColorTintId = R.color.white, iconBackgroundColorId = R.color.FourthColor )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                StandardIconButton(accion = { }, icon = Icons.Outlined.Block, iconColorTintId = R.color.white, iconBackgroundColorId = R.color.red )
+                            }
+
+                            RequestType.OUTGOING -> {
+                                StandardIconButton(accion = { }, icon = Icons.Outlined.Cancel, iconColorTintId = R.color.white, iconBackgroundColorId = R.color.orange )
+                            }
+
+                            else -> null
+                        }
                     }
                 }
             }
         }
+    }
+
+    private fun getOutgoingRequests(callback: (List<String>) -> Unit) {
+        val currentFirebaseUser = Firebase.auth.currentUser
+        val db = Firebase.firestore
+        val collectionRef = db.collection("outgoingRequests")
+        val query = collectionRef.whereEqualTo("userId", currentFirebaseUser!!.uid)
+
+        query.get()
+            .addOnSuccessListener { querySnapshot ->
+                val contacts = mutableListOf<String>()
+                for (document in querySnapshot.documents) {
+                    val contactName = document.get("outgoingContactEmail") as String
+                    contacts.add(contactName)
+                }
+                Toast.makeText(
+                    baseContext,
+                    "Outgoing requests succesfully loaded. You have ${contacts.size} requests",
+                    Toast.LENGTH_SHORT,
+                ).show()
+                callback(contacts)
+            }
+            .addOnFailureListener {
+                Toast.makeText(
+                    baseContext,
+                    "Error while getting your outgoing requests.",
+                    Toast.LENGTH_SHORT,
+                ).show()
+            }
+    }
+
+    private fun getIncomingRequests(callback: (List<String>) -> Unit) {
+        val currentFirebaseUser = Firebase.auth.currentUser
+        val db = Firebase.firestore
+        val collectionRef = db.collection("incomingRequests")
+        val query = collectionRef.whereEqualTo("userId", currentFirebaseUser!!.uid)
+
+        query.get()
+            .addOnSuccessListener { querySnapshot ->
+                val contacts = mutableListOf<String>()
+                for (document in querySnapshot.documents) {
+                    val contactName = document.get("incomingContactEmail") as String
+                    contacts.add(contactName)
+                }
+                Toast.makeText(
+                    baseContext,
+                    "Incomming requests succesfully loaded. You have ${contacts.size} requests",
+                    Toast.LENGTH_SHORT,
+                ).show()
+                callback(contacts)
+            }
+            .addOnFailureListener {
+                Toast.makeText(
+                    baseContext,
+                    "Error while getting your incoming requests.",
+                    Toast.LENGTH_SHORT,
+                ).show()
+            }
     }
 
     private fun getContacts(callback: (List<String>) -> Unit) {
