@@ -2,9 +2,11 @@ package com.example.myfirstapp
 
 import DrawPieChart
 import android.annotation.SuppressLint
+import android.content.ContentValues
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -26,6 +28,10 @@ import com.example.myfirstapp.ui.theme.MyFirstAppTheme
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.util.*
 
 class HomeActivity : ComponentActivity() {
@@ -38,7 +44,12 @@ class HomeActivity : ComponentActivity() {
     @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
+        GlobalScope.launch {
+            actualizarPresupuestos()
+        }
+
         setContent {
             MyFirstAppTheme {
                 // A surface container using the 'background' color from the theme
