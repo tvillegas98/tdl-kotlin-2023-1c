@@ -226,17 +226,38 @@ class PresupuestosActivity : ComponentActivity() {
                                 Log.w(ContentValues.TAG, "Error adding document", e)
                             }
                     } else {
-                        db.collection("presupuestos").document(documentReference.documents[0].id)
-                            .update("baseAmount", montoBase).addOnSuccessListener {
+                        var presupuestoMasReciente = mutableStateOf(documentReference.documents[0])
+                        var fechaMasReciente =
+                            presupuestoMasReciente.value.getString("creationDate")?.let {
+                                it.split("-")
+                            }!!.map { it.toInt() }
+
+                        // Simplemente buscamos el presupuesto más reciente
+                        for (document in documentReference.documents) {
+                            val fechaPresupuesto = document.getString("creationDate")?.let {
+                                it.split("-")
+                            }!!.map { it.toInt() }
+                            if (fechaMasReciente[YEAR] < fechaPresupuesto[YEAR] && fechaMasReciente[MONTH] < fechaPresupuesto[MONTH]) {
+                                presupuestoMasReciente.value = document
+                                fechaMasReciente = fechaPresupuesto
+                            }
+                        }
+
+                        db.collection("presupuestos").document(presupuestoMasReciente.value.id)
+                            .update(
+                                "baseAmount", montoBase
+                            ).addOnSuccessListener {
                                 Toast.makeText(
                                     baseContext,
                                     "Se actualizó el monto base para esa categoría.",
                                     Toast.LENGTH_SHORT,
                                 ).show()
-                                onDone()
+                                startActivity(Intent(this, PresupuestosActivity::class.java))
                             }.addOnFailureListener { e ->
                                 Log.w(ContentValues.TAG, "Error updating document", e)
                             }
+
+
                     }
                 }.addOnFailureListener { e ->
                     Log.w(ContentValues.TAG, "Hubo un error al realizar la query", e)
@@ -254,6 +275,7 @@ data class Presupuesto(
     var spentAmount: Double = 0.0,
     var userUID: String = ""
 )
+
 @RequiresApi(Build.VERSION_CODES.O)
 fun actualizarPresupuestos() {
     val userUID = Firebase.auth.currentUser?.uid
@@ -262,9 +284,7 @@ fun actualizarPresupuestos() {
 
     runBlocking {
         launch {
-            db.collection("presupuestos")
-                .whereEqualTo("userUID", userUID)
-                .get()
+            db.collection("presupuestos").whereEqualTo("userUID", userUID).get()
                 .addOnSuccessListener { presupuestos ->
                     for (presupuesto in presupuestos) {
                         val nuevoPresupuesto = Presupuesto()
@@ -288,7 +308,7 @@ fun actualizarPresupuestos() {
                 }.addOnFailureListener {
                     Log.w(ContentValues.TAG, "Error al buscar presupuestos")
                 }
-            delay(3000L)
+            delay(3000L) // Este delay está para asegurarnos de que la consulta llegue
         }
     }
 
@@ -298,16 +318,18 @@ fun actualizarPresupuestos() {
 
     val fechaActual = LocalDate.now().toString()
 
-    for((_category, presupuestos) in presupuestosAgrupados){
-        if(!existePresupuestoEsteMes(presupuestos, fechaActual)){
-            val presupuestoMasReciente = presupuestos.maxWith(compareBy({ it.creationDate[YEAR]}, { it.creationDate[MONTH] }))
+    for ((_category, presupuestos) in presupuestosAgrupados) {
+        if (!existePresupuestoEsteMes(presupuestos, fechaActual)) {
+            val presupuestoMasReciente = presupuestos.maxWith(compareBy({ it.creationDate[YEAR] },
+                { it.creationDate[MONTH] })
+            )
             crearNuevoPresupuesto(presupuestoMasReciente);
         }
     }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
-fun crearNuevoPresupuesto(presupuesto: Presupuesto){
+fun crearNuevoPresupuesto(presupuesto: Presupuesto) {
     val db = Firebase.firestore
 
     val nuevoPresupuesto = hashMapOf(
@@ -317,23 +339,20 @@ fun crearNuevoPresupuesto(presupuesto: Presupuesto){
         "creationDate" to LocalDate.now().toString(),
         "spentAmount" to 0.0
     )
-    db.collection("presupuestos").add(nuevoPresupuesto)
-        .addOnSuccessListener { documentReference ->
+    db.collection("presupuestos").add(nuevoPresupuesto).addOnSuccessListener { documentReference ->
             Log.w(
-                ContentValues.TAG,
-                "Se créo un presupuesto nuevo${documentReference.id}!"
+                ContentValues.TAG, "Se créo un presupuesto nuevo${documentReference.id}!"
             )
-        }
-        .addOnFailureListener { e ->
+        }.addOnFailureListener { e ->
             Log.w(ContentValues.TAG, "Error al crear presupuesto", e)
         }
 }
 
-fun existePresupuestoEsteMes(presupuestos: List<Presupuesto>, fecha: String): Boolean{
+fun existePresupuestoEsteMes(presupuestos: List<Presupuesto>, fecha: String): Boolean {
     val fecha = fecha.split("-")
-    for(presupuesto in presupuestos){
+    for (presupuesto in presupuestos) {
         val fechaPresupuesto = presupuesto.creationDate
-        if(fechaPresupuesto[YEAR] == fecha[YEAR] && fechaPresupuesto[MONTH] == fecha[MONTH]){
+        if (fechaPresupuesto[YEAR] == fecha[YEAR] && fechaPresupuesto[MONTH] == fecha[MONTH]) {
             return true
         }
     }
