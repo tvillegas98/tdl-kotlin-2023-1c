@@ -26,6 +26,7 @@ import com.github.mikephil.charting.components.Legend
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
+import com.github.mikephil.charting.highlight.Highlight
 import java.util.ArrayList
 
 // on below line we are adding different colors.
@@ -120,6 +121,8 @@ fun DrawPieChart(gastosPorCatgoria: Map<String, Double>) {
 
                         this.legend.isEnabled = false
 
+                        this.animateY(1000)
+
                         // on below line we are specifying entry label color as white.
                         //this.setEntryLabelColor(R.color.white)
                     }
@@ -206,6 +209,8 @@ fun updatePieChartWithData(
 
         // on below line we are specifying type face as bold.
         ds.valueTypeface = Typeface.DEFAULT_BOLD
+
+        ds.setDrawValues(false)
     }
 
     // on below line we are creating

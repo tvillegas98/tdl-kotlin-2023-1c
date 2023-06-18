@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActionScope
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
@@ -211,7 +213,7 @@ class HistorialGastosActivity : ComponentActivity() {
             modifier = Modifier.background(color = colorResource(id = R.color.white)),
             trailingIcon = {
                 IconButton(
-                    onClick = buscarTitulo(busqueda)
+                    onClick = { buscarTitulo(busqueda) }
                 ) {
                     Icon(
                         imageVector = Icons.Default.Search,
@@ -221,7 +223,10 @@ class HistorialGastosActivity : ComponentActivity() {
                 }
             },
             keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Send // Define el tipo de acción del botón "Enter"
+                imeAction = ImeAction.Search // Define el tipo de acción del botón "Enter"
+            ),
+            keyboardActions = KeyboardActions(
+                onSearch = { buscarTitulo(busqueda) }
             )
         )
     }
@@ -384,7 +389,7 @@ class HistorialGastosActivity : ComponentActivity() {
         return {startActivity(intent)}
     }
 
-    private fun buscarTitulo(busqueda: String): () -> Unit {
+    private fun buscarTitulo(busqueda: String) {
         val intent = Intent(this, HistorialGastosActivity::class.java)
         if (filtroCategoria != null) {
             intent.putExtra("categoria", filtroCategoria)
@@ -393,7 +398,7 @@ class HistorialGastosActivity : ComponentActivity() {
             intent.putExtra("fuente", filtroFuente)
         }
         intent.putExtra("titulo", busqueda)
-        return {startActivity(intent)}
+        return startActivity(intent)
     }
 
     @Composable
