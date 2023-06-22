@@ -102,7 +102,7 @@ class HomeActivity : ComponentActivity() {
     }
 
     @Composable
-    private fun DrawSummary(gastosPorCategoria: Map<String, Float>) {
+    private fun DrawSummary(gastosPorCategoria: Map<String, Double>) {
         var indice = 0
         Column (
             modifier = Modifier

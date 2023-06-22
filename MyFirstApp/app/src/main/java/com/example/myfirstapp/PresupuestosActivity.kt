@@ -174,7 +174,7 @@ class PresupuestosActivity : ComponentActivity() {
     fun CrearPresupuestoButton(
         categoria: String, montoBase: String, userUID: String, onDone: () -> Unit
     ) {
-        val fechaDelPresupuesto = LocalDate.now()
+        val fechaDelPresupuesto = LocalDate.now().toString()
         val db = Firebase.firestore
 
         Button(onClick = {
@@ -187,10 +187,14 @@ class PresupuestosActivity : ComponentActivity() {
             )
 
 
-            db.collection("presupuestos").whereEqualTo("category", categoria).get()
+            db.collection("presupuestos")
+                .whereEqualTo("category", categoria)
+                .whereEqualTo("userUID", userUID)
+                .get()
                 .addOnSuccessListener { documentReference ->
                     if (documentReference.documents.isEmpty()) {
-                        db.collection("presupuestos").add(presupuesto)
+                        db.collection("presupuestos")
+                            .add(presupuesto)
                             .addOnSuccessListener { documentReference ->
                                 Log.d(
                                     ContentValues.TAG,
@@ -349,7 +353,9 @@ fun ListarPresupuestos() {
     val presupuestos = remember { mutableStateOf(emptyList<List<String>>()) }
 
     LaunchedEffect(Unit) {
-        db.collection("presupuestos").whereEqualTo("userUID", currentFirebaseUser!!.uid).get()
+        db.collection("presupuestos")
+            .whereEqualTo("userUID", currentFirebaseUser!!.uid)
+            .get()
             .addOnSuccessListener { querySnapshot ->
                 val tempList = mutableListOf<List<String>>()
                 for (document in querySnapshot) {
