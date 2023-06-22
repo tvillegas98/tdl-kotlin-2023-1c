@@ -2,7 +2,9 @@ package com.example.myfirstapp.ui
 
 
 import android.content.ContentValues
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -118,18 +120,6 @@ fun StandardIconButton(accion : () -> Unit, icon : ImageVector, iconColorTintId:
             contentDescription = "",
             tint = colorResource(id = iconColorTintId),
             modifier = Modifier.size(35.dp)
-        )
-    }
-}
-
-@Composable
-fun StandardBackButton(onBackClick: () -> Unit) {
-    IconButton(onClick = onBackClick) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = Color.Black,
-            modifier = Modifier.size(24.dp)
         )
     }
 }
