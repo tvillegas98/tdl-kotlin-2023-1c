@@ -1,3 +1,5 @@
+package com.example.myfirstapp.ui
+
 import android.graphics.Typeface
 import android.view.ViewGroup
 import android.widget.LinearLayout
@@ -163,7 +165,7 @@ fun updatePieChartWithData(
 ) {
     // on below line we are creating
     // array list for the entries.
-    var entries = ArrayList<PieEntry>()
+    val entries = ArrayList<PieEntry>()
 
     // on below line we are running for loop for
     // passing data from list into entries list.

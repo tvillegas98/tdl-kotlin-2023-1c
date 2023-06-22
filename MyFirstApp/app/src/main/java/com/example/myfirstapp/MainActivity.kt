@@ -18,13 +18,14 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    lanzarApp()
+                    LanzarInicio()
                 }
             }
         }
     }
 
-    private fun lanzarApp() {
+    @Composable
+    private fun LanzarInicio() {
         startActivity(Intent(this, InicioActivity::class.java))
     }
 }

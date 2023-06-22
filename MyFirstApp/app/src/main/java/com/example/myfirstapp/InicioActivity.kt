@@ -101,7 +101,7 @@ class InicioActivity : ComponentActivity() {
         // [START send_email_verification]
         val user = auth.currentUser!!
         user.sendEmailVerification()
-            .addOnCompleteListener(this) { task ->
+            .addOnCompleteListener(this) {
                 // Email Verification sent
             }
         // [END send_email_verification]

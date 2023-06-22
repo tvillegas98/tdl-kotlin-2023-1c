@@ -26,11 +26,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
-import com.example.myfirstapp.ui.theme.MyFirstAppTheme
 import com.example.myfirstapp.ui.PasswordTextField
-import com.example.myfirstapp.ui.StandardTextField
 import com.example.myfirstapp.ui.StandardButton
+import com.example.myfirstapp.ui.StandardTextField
 import com.example.myfirstapp.ui.StandardTopAppBar
+import com.example.myfirstapp.ui.theme.MyFirstAppTheme
 import com.google.firebase.auth.FirebaseAuth
 
 class CrearCuentaActivity : ComponentActivity() {
@@ -83,18 +83,18 @@ class CrearCuentaActivity : ComponentActivity() {
             StandardTextField(string = apellido, label ="Apellido", onValueChanged = { apellido = it }, icon = Icons.Default.Person)
             StandardTextField(string = email, label ="Email",onValueChanged = { email = it }, icon=Icons.Default.Email)
             PasswordTextField(password = password, onValueChanged = { password = it })
-            CreateAccountButton(email = email, password = password, nombreCompleto = "$nombre $apellido")
+            CreateAccountButton(email = email, password = password)
         }
 
     }
 
 
     @Composable
-    fun CreateAccountButton(email: String, password: String, nombreCompleto: String) {
-        StandardButton(onClick = { verifyAccount(email, password, nombreCompleto) }, label = "Crear Usuario")
+    fun CreateAccountButton(email: String, password: String) {
+        StandardButton(onClick = { verifyAccount(email, password) }, label = "Crear Usuario")
     }
 
-    private fun verifyAccount(email:String, password:String, nombreCompleto:String) {
+    private fun verifyAccount(email: String, password: String) {
         //Verifico que el email no este registrado a otra cuenta
         auth.fetchSignInMethodsForEmail(email)
             .addOnCompleteListener { task ->
@@ -127,7 +127,8 @@ class CrearCuentaActivity : ComponentActivity() {
                 if (task.isSuccessful) {
                     // Sign in success, update UI with the signed-in user's information
                     Log.d(TAG, "createUserWithEmail:success")
-                    startActivity(Intent(this, HomeActivity::class.java))
+                    auth.currentUser
+                    startActivity(Intent(this, RegistrarGastosActivity::class.java))
                 } else {
                     // If sign in fails, display a message to the user.
                     Log.w(TAG, "createUserWithEmail:failure", task.exception)
