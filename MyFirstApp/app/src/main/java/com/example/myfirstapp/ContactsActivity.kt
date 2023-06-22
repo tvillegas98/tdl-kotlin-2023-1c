@@ -59,7 +59,6 @@ import com.example.myfirstapp.ui.theme.MyFirstAppTheme
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
@@ -86,13 +85,12 @@ data class Contact(
     val id:     String
 )
 
-@Suppress("UNUSED_EXPRESSION")
 class ContactsActivity : ComponentActivity() {
     private val perfil  = {startActivity(Intent(this, ProfileActivity::class.java))}
     private val db = Firebase.firestore
-    private val currentFirebaseUser         = Firebase.auth.currentUser
-    private val currentFirebaseUserId       = currentFirebaseUser!!.uid
-    private val currentFirebaseUserEmail    = currentFirebaseUser!!.email
+    private val currentFirebaseUser                 = Firebase.auth.currentUser
+    private val currentFirebaseUserId: String       = currentFirebaseUser!!.uid
+    private val currentFirebaseUserEmail: String? = currentFirebaseUser?.email
 
     @RequiresApi(Build.VERSION_CODES.M)
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -298,91 +296,154 @@ class ContactsActivity : ComponentActivity() {
                 .verticalScroll(rememberScrollState(), enabled = true)
                 .padding(bottom = 80.dp)
         ) {
-            // Vemos que lista es la que se completó mediante la consulta a FB.
-            // Si obtuvimos solicitudes entonces debemos mostrarlas.
-            if (requests.isNotEmpty()) {
-                requests.forEach { request ->
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(10.dp),
-                        elevation = 8.dp,
-                        shape = RoundedCornerShape(8.dp),
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(15.dp),
-                            horizontalArrangement = Arrangement.SpaceAround,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            // Mostramos distintos botones en función del tipo de solicitud.
-                            when (requestType) {
-                                RequestType.INCOMING -> {
-                                    Text(request.requesterEmail)
-                                    StandardIconButton(
-                                        accion = { acceptRequest(request) },
-                                        icon = Icons.Outlined.Done,
-                                        iconColorTintId = R.color.white,
-                                        iconBackgroundColorId = R.color.FourthColor
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    StandardIconButton(
-                                        accion = { deleteRequest(request) },
-                                        icon = Icons.Outlined.Block,
-                                        iconColorTintId = R.color.white,
-                                        iconBackgroundColorId = R.color.red
-                                    )
-                                }
-
-                                RequestType.OUTGOING -> {
-                                    Text(request.requestedEmail)
-                                    StandardIconButton(
-                                        accion = { deleteRequest(request) },
-                                        icon = Icons.Outlined.Cancel,
-                                        iconColorTintId = R.color.white,
-                                        iconBackgroundColorId = R.color.orange
-                                    )
-                                }
-
-                                else -> {}
-                            }
-                        }
-                    }
-                }
-            }
-                    // Lo mismo si obtuvimos contactos.
-            if (contacts.isNotEmpty()) {
-                contacts.forEach { contact ->
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(10.dp),
-                        elevation = 8.dp,
-                        shape = RoundedCornerShape(8.dp),
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(15.dp),
-                            horizontalArrangement = Arrangement.SpaceAround,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(contact.email)
-                            StandardIconButton(
-                                accion = { deleteContact(contact) },
-                                icon = Icons.Outlined.Delete,
-                                iconColorTintId = R.color.white,
-                                iconBackgroundColorId = R.color.red
-                            )
-                        }
-                    }
-                }
+            // En función de lo seleccionado por el usuario, mostramos solicitudes o contactos
+            if (requestType == RequestType.CONTACTS) {
+                ShowContacts(contacts)
+            } else {
+                ShowRequests(requests, requestType)
             }
         }
     }
 
-    private fun deleteContact(contact: Contact) {}
+    private fun deleteBothContacts(firstContact: Contact, secondContact: Contact) {
+        deleteContact(contactToDelete = secondContact, from = firstContact)
+        deleteContact(contactToDelete = firstContact, from = secondContact)
+    }
+
+    private fun deleteContact(contactToDelete: Contact, from: Contact) {
+        val query = db.collection("contacts").whereEqualTo("userId", from.id)
+        query.get()
+            .addOnSuccessListener { querySnapshot ->
+                if (!querySnapshot.isEmpty) {
+                    val document = querySnapshot.documents.first()
+                    val data = document.data?.toMutableMap()
+
+                    if (data != null) {
+                        data.remove(contactToDelete.email)
+                        document.reference
+                            .set(data)
+                            .addOnSuccessListener {
+                                Toast.makeText(
+                                    baseContext,
+                                    "Contact successfully deleted.",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                            .addOnFailureListener { exception ->
+                                Toast.makeText(
+                                    baseContext,
+                                    "Error deleting contact: ${exception.message}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                    }
+                }
+            }
+            .addOnFailureListener { exception ->
+                Toast.makeText(
+                    baseContext,
+                    "Error deleting contact: ${exception.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+    }
+
+    @Composable
+    private fun ShowRequests(requests: List<Request>, requestType: RequestType) {
+        if (requests.isNotEmpty()) {
+            requests.forEach { request ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp),
+                    elevation = 8.dp,
+                    shape = RoundedCornerShape(8.dp),
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(15.dp),
+                        horizontalArrangement = Arrangement.SpaceAround,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Mostramos distintos botones en función del tipo de solicitud.
+                        when (requestType) {
+                            RequestType.INCOMING -> {
+                                Text(request.requesterEmail)
+                                StandardIconButton(
+                                    accion = { acceptRequest(request) },
+                                    icon = Icons.Outlined.Done,
+                                    iconColorTintId = R.color.white,
+                                    iconBackgroundColorId = R.color.FourthColor
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                StandardIconButton(
+                                    accion = { deleteRequest(request) },
+                                    icon = Icons.Outlined.Block,
+                                    iconColorTintId = R.color.white,
+                                    iconBackgroundColorId = R.color.red
+                                )
+                            }
+
+                            RequestType.OUTGOING -> {
+                                Text(request.requestedEmail)
+                                StandardIconButton(
+                                    accion = { deleteRequest(request) },
+                                    icon = Icons.Outlined.Cancel,
+                                    iconColorTintId = R.color.white,
+                                    iconBackgroundColorId = R.color.orange
+                                )
+                            }
+
+                            else -> {}
+                        }
+                    }
+                }
+            }
+        } else {
+            // Idealmente poner un icono o algo para hacer mas linda la UI.
+            Text(text = "No requests pending !.")
+        }
+    }
+    @Composable
+    private fun ShowContacts(contacts: List<Contact>) {
+        val actualUserContact: Contact? = currentFirebaseUserEmail?.let { Contact(email = it, id = currentFirebaseUserId) }
+        // Lo mismo si obtuvimos contactos.
+        if (contacts.isNotEmpty()) {
+            contacts.forEach { contact ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp),
+                    elevation = 8.dp,
+                    shape = RoundedCornerShape(8.dp),
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(15.dp),
+                        horizontalArrangement = Arrangement.SpaceAround,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(contact.email)
+                        StandardIconButton(
+                            accion = {
+                                if (actualUserContact != null) {
+                                    deleteBothContacts(actualUserContact, contact)
+                                }
+                            },
+                            icon = Icons.Outlined.Delete,
+                            iconColorTintId = R.color.white,
+                            iconBackgroundColorId = R.color.red
+                        )
+                    }
+                }
+            }
+        } else {
+            // Idealmente poner un icono o algo para hacer mas linda la UI.
+            Text(text = "You do not have any contact, what are you waiting for ?")
+        }
+    }
 
     // Las siguientes funciones manejan las maneras posibles de afectar una solicitud.
     private fun acceptRequest(request: Request) {
@@ -497,10 +558,13 @@ class ContactsActivity : ComponentActivity() {
                 val contacts = mutableListOf<Contact>()
                 val data = querySnapshot.documents.first().data
                 if (data != null) {
-                    for ((key, value) in data) {
-                        if (key != "userId") {
+                    for ((email, id) in data) {
+                        if (email != "userId") {
                             contacts.add(
-                                Contact(key as String, value as String)
+                                Contact(
+                                    email   = email,
+                                    id      = id as String
+                                )
                             )
                         }
                     }
