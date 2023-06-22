@@ -12,10 +12,8 @@ import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,18 +30,14 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -62,25 +56,16 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import java.text.SimpleDateFormat
 import java.time.LocalDate
-import java.time.Year
-import java.util.Calendar
-import java.util.GregorianCalendar
-import java.util.Locale
 
 
-const val YEAR = 0;
-const val MONTH = 1;
+const val YEAR = 0
+const val MONTH = 1
 
 class PresupuestosActivity : ComponentActivity() {
-    private val home = { startActivity(Intent(this, HomeActivity::class.java)) }
-    private val registrarGastos =
-        { startActivity(Intent(this, RegistrarGastosActivity::class.java)) }
-    private val historialGastos =
-        { startActivity(Intent(this, HistorialGastosActivity::class.java)) }
-    private val perfil = { startActivity(Intent(this, ProfileActivity::class.java)) }
-    private val presupuestos = { startActivity(Intent(this, PresupuestosActivity::class.java)) }
+    private val home = {startActivity(Intent(this, HomeActivity::class.java))}
+    private val perfil = {startActivity(Intent(this, ProfileActivity::class.java))}
+    private val presupuestos = {startActivity(Intent(this, PresupuestosActivity::class.java))}
 
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -107,15 +92,13 @@ class PresupuestosActivity : ComponentActivity() {
                         }
                     }, bottomBar = {
                         StandardNavigationAppBar(
-                            registrarGastos = registrarGastos,
+                            home=home,
                             perfil = perfil,
-                            historialGastos = historialGastos,
-                            presupuestos = presupuestos,
-                            home = home
+                            presupuestos = presupuestos
                         )
                     }) {
-                        listarPresupuestos()
-                        registrarPresupuestoModal(show = mostrarPresupuestoModal, onDismiss = {
+                        ListarPresupuestos()
+                        RegistrarPresupuestoModal(show = mostrarPresupuestoModal, onDismiss = {
                             mostrarPresupuestoModal = false
                         }, onDone = {
                             mostrarPresupuestoModal = false
@@ -128,7 +111,7 @@ class PresupuestosActivity : ComponentActivity() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     @Composable
-    fun registrarPresupuestoModal(
+    fun RegistrarPresupuestoModal(
         show: Boolean, onDismiss: () -> Unit, onDone: () -> Unit, modifier: Modifier = Modifier
     ) {
         var categoria: String by remember { mutableStateOf("") }
@@ -173,7 +156,7 @@ class PresupuestosActivity : ComponentActivity() {
                         modifier = modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
                     ) {
-                        crearPresupuestoButton(
+                        CrearPresupuestoButton(
                             categoria = categoria,
                             montoBase = montoBase,
                             userUID = currentFirebaseUser!!.uid,
@@ -188,10 +171,10 @@ class PresupuestosActivity : ComponentActivity() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     @Composable
-    fun crearPresupuestoButton(
+    fun CrearPresupuestoButton(
         categoria: String, montoBase: String, userUID: String, onDone: () -> Unit
     ) {
-        var fechaDelPresupuesto = LocalDate.now()
+        val fechaDelPresupuesto = LocalDate.now()
         val db = Firebase.firestore
 
         Button(onClick = {
@@ -226,7 +209,7 @@ class PresupuestosActivity : ComponentActivity() {
                                 Log.w(ContentValues.TAG, "Error adding document", e)
                             }
                     } else {
-                        var presupuestoMasReciente = mutableStateOf(documentReference.documents[0])
+                        val presupuestoMasReciente = mutableStateOf(documentReference.documents[0])
                         var fechaMasReciente =
                             presupuestoMasReciente.value.getString("creationDate")?.let {
                                 it.split("-")
@@ -318,12 +301,12 @@ fun actualizarPresupuestos() {
 
     val fechaActual = LocalDate.now().toString()
 
-    for ((_category, presupuestos) in presupuestosAgrupados) {
+    for ((_, presupuestos) in presupuestosAgrupados) {
         if (!existePresupuestoEsteMes(presupuestos, fechaActual)) {
             val presupuestoMasReciente = presupuestos.maxWith(compareBy({ it.creationDate[YEAR] },
                 { it.creationDate[MONTH] })
             )
-            crearNuevoPresupuesto(presupuestoMasReciente);
+            crearNuevoPresupuesto(presupuestoMasReciente)
         }
     }
 }
@@ -349,10 +332,10 @@ fun crearNuevoPresupuesto(presupuesto: Presupuesto) {
 }
 
 fun existePresupuestoEsteMes(presupuestos: List<Presupuesto>, fecha: String): Boolean {
-    val fecha = fecha.split("-")
+    val fechaSplit = fecha.split("-")
     for (presupuesto in presupuestos) {
         val fechaPresupuesto = presupuesto.creationDate
-        if (fechaPresupuesto[YEAR] == fecha[YEAR] && fechaPresupuesto[MONTH] == fecha[MONTH]) {
+        if (fechaPresupuesto[YEAR] == fechaSplit[YEAR] && fechaPresupuesto[MONTH] == fechaSplit[MONTH]) {
             return true
         }
     }
@@ -360,7 +343,7 @@ fun existePresupuestoEsteMes(presupuestos: List<Presupuesto>, fecha: String): Bo
 }
 
 @Composable
-fun listarPresupuestos() {
+fun ListarPresupuestos() {
     val currentFirebaseUser = Firebase.auth.currentUser
     val db = Firebase.firestore
     val presupuestos = remember { mutableStateOf(emptyList<List<String>>()) }

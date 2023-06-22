@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MyFirstApp</string>
+    <string name="app_name">Wallet Partner</string>
 
     <string name="article_title">Jetpack Compose tutorial</string>
     <string name="article_description">Jetpack Compose is a modern toolkit for building native Android UI. Compose simplifies and accelerates UI development on Android with less code, powerful tools, and intuitive Kotlin APIs.</string>
@@ -24,4 +24,5 @@
     <string name="personal_card_mail">santiago.ruiz.sugliani@gmail.com</string>
     <string name="title_activity_profile">ProfileActivity</string>
     <string name="title_activity_personal_data">PersonalDataActivity</string>
+    <string name="title_activity_contacts">ContactsActivity</string>
 </resources>

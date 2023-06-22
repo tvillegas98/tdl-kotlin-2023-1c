@@ -40,7 +40,6 @@ class InicioActivity : ComponentActivity() {
     private lateinit var auth: FirebaseAuth
     // [END declare_auth]
 
-    @RequiresApi(Build.VERSION_CODES.M)
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -102,7 +101,7 @@ class InicioActivity : ComponentActivity() {
         // [START send_email_verification]
         val user = auth.currentUser!!
         user.sendEmailVerification()
-            .addOnCompleteListener(this) { task ->
+            .addOnCompleteListener(this) {
                 // Email Verification sent
             }
         // [END send_email_verification]
@@ -110,7 +109,7 @@ class InicioActivity : ComponentActivity() {
 
     private fun redirigir() {
         //TODO DESCOMENTAR CUANDO ESTE TODO HECHO
-        //startActivity(Intent(this, ProfileActivity::class.java))
+        //startActivity(Intent(this, HomeActivity::class.java))
     }
 
     companion object {
@@ -118,11 +117,10 @@ class InicioActivity : ComponentActivity() {
     }
 
     //Prueba de integración con FB
-    @RequiresApi(Build.VERSION_CODES.M)
     @Composable
     fun UserLogIn() {
         //TODO DES-HARDCODEAR
-        var email by remember { mutableStateOf("santiago.ruiz.sugliani@gmail.com") }
+        var email by remember { mutableStateOf("actualizado@gmail.com") }
         var password by rememberSaveable { mutableStateOf("abcdef123456") }
 
         Column(

@@ -2,11 +2,9 @@ package com.example.myfirstapp
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonAdd
@@ -45,16 +44,16 @@ import com.google.firebase.ktx.Firebase
 
 class ProfileActivity : ComponentActivity() {
     /* NavBar */
-    private val home            = {startActivity(Intent(this, HomeActivity::class.java))}
-    private val registrarGastos = {startActivity(Intent(this, RegistrarGastosActivity::class.java))}
-    private val historialGastos = {startActivity(Intent(this, HistorialGastosActivity::class.java))}
-    private val perfil          = {startActivity(Intent(this, ProfileActivity::class.java))}
-    private val presupuestos    = {startActivity(Intent(this, PresupuestosActivity::class.java))}
+    private val home            = { startActivity(Intent(this, HomeActivity::class.java)) }
+    private val registrarGastos = { startActivity(Intent(this, RegistrarGastosActivity::class.java)) }
+    private val historialGastos = { startActivity(Intent(this, HistorialGastosActivity::class.java)) }
+    private val perfil          = { startActivity(Intent(this, ProfileActivity::class.java)) }
+    private val presupuestos    = { startActivity(Intent(this, PresupuestosActivity::class.java)) }
+    private val contactos       = { startActivity(Intent(this, ContactsActivity::class.java)) }
 
     /* Profile */
     private val datos = {startActivity(Intent(this, PersonalDataActivity::class.java))}
 
-    @RequiresApi(Build.VERSION_CODES.M)
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,9 +68,7 @@ class ProfileActivity : ComponentActivity() {
                     Scaffold(
                         bottomBar = { StandardNavigationAppBar(
                             home            = home,
-                            registrarGastos = registrarGastos,
                             perfil          = perfil,
-                            historialGastos = historialGastos,
                             presupuestos    = presupuestos)
                         }
                     ) {
@@ -112,7 +109,7 @@ class ProfileActivity : ComponentActivity() {
             //Text(text = "Nivel $level", style= androidx.compose.material.MaterialTheme.typography.h5)
 
             ButtonPerfil(icon = Icons.Default.Person,       label = "Datos Personales",     onClick = datos)
-            ButtonPerfil(icon = Icons.Default.PersonAdd,    label = "Añadir contacto",      onClick = {})
+            ButtonPerfil(icon = Icons.Default.Groups,       label = "Contactos",            onClick = contactos)
             ButtonPerfil(icon = Icons.Default.Settings,     label = "Configuración",        onClick = {})
             ButtonPerfil(icon = Icons.Default.Warning,      label = "Botón de baja",        onClick = {})
             ButtonPerfil(icon = Icons.Default.Info,         label = "Preguntas frecuentes", onClick = {})
@@ -141,7 +138,7 @@ class ProfileActivity : ComponentActivity() {
                 color = MaterialTheme.colorScheme.background
             ) {
                 Scaffold(
-                    bottomBar = { StandardNavigationAppBar(home=home,registrarGastos=registrarGastos, perfil = perfil, historialGastos=historialGastos, presupuestos=presupuestos) }
+                    bottomBar = { StandardNavigationAppBar(home=home, perfil = perfil, presupuestos=presupuestos) }
                 ) {
                     ProfileMenu()
                 }

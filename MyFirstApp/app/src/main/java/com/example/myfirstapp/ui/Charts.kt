@@ -1,3 +1,5 @@
+package com.example.myfirstapp.ui
+
 import android.graphics.Typeface
 import android.view.ViewGroup
 import android.widget.LinearLayout
@@ -19,8 +21,6 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.content.ContextCompat
-import com.example.myfirstapp.R
 import com.example.myfirstapp.ui.coloresPieChart
 import com.example.myfirstapp.ui.whiteColor
 import com.github.mikephil.charting.charts.PieChart
@@ -28,6 +28,7 @@ import com.github.mikephil.charting.components.Legend
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
+import com.github.mikephil.charting.highlight.Highlight
 import java.util.ArrayList
 
 // on below line we are adding different colors.
@@ -37,13 +38,13 @@ import java.util.ArrayList
 // name and value.
 data class PieChartData(
     var browserName: String?,
-    var value: Float?
+    var value: Double?
 )
 
 // on below line we are creating a
 // pie chart function on below line.
 @Composable
-fun DrawPieChart(gastosPorCatgoria: Map<String, Float>) {
+fun DrawPieChart(gastosPorCatgoria: Map<String, Double>) {
     val dataPieChart = convertToPieChartData(gastosPorCatgoria)
 
     // on below line we are again creating a column
@@ -122,6 +123,8 @@ fun DrawPieChart(gastosPorCatgoria: Map<String, Float>) {
 
                         this.legend.isEnabled = false
 
+                        this.animateY(1000)
+
                         // on below line we are specifying entry label color as white.
                         //this.setEntryLabelColor(R.color.white)
                     }
@@ -140,7 +143,7 @@ fun DrawPieChart(gastosPorCatgoria: Map<String, Float>) {
     }
 }
 
-fun convertToPieChartData(gastosPorCatgoria: Map<String, Float>): List<PieChartData> {
+fun convertToPieChartData(gastosPorCatgoria: Map<String, Double>): List<PieChartData> {
     val listaPieChartData = mutableListOf<PieChartData>()
 
     val sumaTotal = gastosPorCatgoria.values.sum()
@@ -162,13 +165,13 @@ fun updatePieChartWithData(
 ) {
     // on below line we are creating
     // array list for the entries.
-    var entries = ArrayList<PieEntry>()
+    val entries = ArrayList<PieEntry>()
 
     // on below line we are running for loop for
     // passing data from list into entries list.
     for (i in data.indices) {
         val item = data[i]
-        entries.add(PieEntry(item.value ?: 0.toFloat(), item.browserName ?: ""))
+        entries.add(PieEntry(item.value?.toFloat() ?: 0.toFloat(), item.browserName ?: ""))
     }
 
     // on below line we are creating
@@ -208,6 +211,8 @@ fun updatePieChartWithData(
 
         // on below line we are specifying type face as bold.
         ds.valueTypeface = Typeface.DEFAULT_BOLD
+
+        ds.setDrawValues(false)
     }
 
     // on below line we are creating

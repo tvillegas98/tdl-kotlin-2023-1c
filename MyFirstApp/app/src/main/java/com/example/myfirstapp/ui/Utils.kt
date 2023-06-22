@@ -2,10 +2,9 @@ package com.example.myfirstapp.ui
 
 
 import android.content.ContentValues
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,16 +23,15 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.outlined.Fastfood
 import androidx.compose.material.icons.outlined.Flight
 import androidx.compose.material.icons.outlined.MedicalServices
-import androidx.compose.material.icons.outlined.Money
 import androidx.compose.material.icons.outlined.QuestionMark
 import androidx.compose.material.icons.outlined.Sell
 import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material.icons.outlined.SportsEsports
+import androidx.compose.material3.ButtonDefaults.shape
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -65,10 +63,9 @@ val redColor = Color(0xFFF44336)
 val pinkColor = Color(0xFFFF0CFF)
 val orangeColor = Color(0xFFFF8F00)
 val whiteColor = Color(0xFFFFFFFF)
-val coloresPieChart = listOf<Color>(greenColor,blueColor,yellowColor, redColor, orangeColor, pinkColor)
+val coloresPieChart = listOf(greenColor,blueColor,yellowColor, redColor, orangeColor, pinkColor)
 
 @RequiresApi(Build.VERSION_CODES.M)
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StandardTextField(string: String, label: String, onValueChanged: (String) -> Unit, icon: ImageVector) {
     OutlinedTextField(
@@ -103,14 +100,23 @@ fun StandardButton(onClick: () -> Unit, label: String) {
 }
 
 @Composable
-fun StandardIconButton(accion : () -> Unit, icon : ImageVector){
+fun StandardIconButton(accion : () -> Unit, icon : ImageVector, iconColorTintId: Int = R.color.white, iconBackgroundColorId: Int = R.color.FourthColor){
     IconButton(
-        onClick = accion
+        onClick = accion,
+        modifier = Modifier
+            .background(color = colorResource(id = iconBackgroundColorId), shape)
+            .border(
+                2.dp,
+                color = colorResource(
+                    id = R.color.black
+                ),
+                shape
+            )
     ) {
         Icon(
             imageVector = icon,
             contentDescription = "",
-            tint = Color.White,
+            tint = colorResource(id = iconColorTintId),
             modifier = Modifier.size(35.dp)
         )
     }
@@ -118,10 +124,10 @@ fun StandardIconButton(accion : () -> Unit, icon : ImageVector){
 
 @Composable
 fun StandardBackButton(onBackClick: () -> Unit) {
-    androidx.compose.material.IconButton(onClick = onBackClick) {
+    IconButton(onClick = onBackClick) {
         Icon(
-            imageVector = Icons.Default.ArrowBack,
-            contentDescription = "Back",
+            imageVector = icon,
+            contentDescription = null,
             tint = Color.Black,
             modifier = Modifier.size(24.dp)
         )

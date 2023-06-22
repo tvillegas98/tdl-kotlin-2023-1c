@@ -1,6 +1,6 @@
 package com.example.myfirstapp
 
-import DrawPieChart
+import com.example.myfirstapp.ui.DrawPieChart
 import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Intent
@@ -61,9 +61,7 @@ class HomeActivity : ComponentActivity() {
                     Scaffold(
                         bottomBar = { StandardNavigationAppBar(
                             home=home,
-                            registrarGastos=registrarGastos,
                             perfil = perfil,
-                            historialGastos=historialGastos,
                             presupuestos = presupuestos )
                         },
                         modifier = Modifier
@@ -79,8 +77,8 @@ class HomeActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.N)
     @Composable
     private fun HomeScreen() {
-        val gastosPorCategoria: Map<String, Float> = obtenerGastoPorCategoria()
-        val mapOrdenado : Map<String, Float> = sortMapByValue(gastosPorCategoria)
+        val gastosPorCategoria: Map<String, Double> = obtenerGastoPorCategoria()
+        val mapOrdenado : Map<String, Double> = sortMapByValue(gastosPorCategoria)
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -105,7 +103,7 @@ class HomeActivity : ComponentActivity() {
 
     @Composable
     private fun DrawSummary(gastosPorCategoria: Map<String, Float>) {
-        var indice : Int = 0
+        var indice = 0
         Column (
             modifier = Modifier
                 .fillMaxSize()
@@ -129,7 +127,7 @@ class HomeActivity : ComponentActivity() {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         CategoryIconBox(categoria, indice)
-                        Text("$categoria")
+                        Text(categoria)
                         Text("$$monto")
                     }
                 }
@@ -140,20 +138,20 @@ class HomeActivity : ComponentActivity() {
 
     @RequiresApi(Build.VERSION_CODES.N)
     @Composable
-    private fun obtenerGastoPorCategoria(): Map<String, Float> {
+    private fun obtenerGastoPorCategoria(): Map<String, Double> {
         val currentFirebaseUser = Firebase.auth.currentUser
         val db = Firebase.firestore
-        val gastosPorCategoria= remember { mutableStateOf(emptyMap<String, Float>()) }
+        val gastosPorCategoria= remember { mutableStateOf(emptyMap<String, Double>()) }
 
         LaunchedEffect(Unit) {
             db.collection("gastos")
                 .whereEqualTo("userUID", currentFirebaseUser!!.uid)
                 .get()
                 .addOnSuccessListener { querySnapshot ->
-                    val tempMap = mutableMapOf<String, Float>()
+                    val tempMap = mutableMapOf<String, Double>()
                     for (document in querySnapshot) {
                         val categoria = document.getString("category")
-                        val monto = document.getString("amount")?.toFloatOrNull()
+                        val monto = document.getDouble("amount")
 
                         if (categoria != null && monto != null) {
                             if (tempMap.containsKey(categoria)) {
@@ -178,7 +176,7 @@ class HomeActivity : ComponentActivity() {
         return gastosPorCategoria.value
     }
 
-    private fun sortMapByValue(map: Map<String, Float>): Map<String, Float> {
+    private fun sortMapByValue(map: Map<String, Double>): Map<String, Double> {
         return map.toList()
             .sortedByDescending { (_, value) -> value }
             .toMap()
