@@ -2,13 +2,11 @@ package com.example.myfirstapp
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -41,7 +39,6 @@ class CrearCuentaActivity : ComponentActivity() {
     private lateinit var auth: FirebaseAuth
     // [END declare_auth]
 
-    @RequiresApi(Build.VERSION_CODES.M)
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter",
         "UnusedMaterialScaffoldPaddingParameter"
     )
@@ -68,7 +65,6 @@ class CrearCuentaActivity : ComponentActivity() {
             }
         }
     }
-    @RequiresApi(Build.VERSION_CODES.M)
     @Composable
     private fun AskForUserData() {
         var email by remember { mutableStateOf("") }

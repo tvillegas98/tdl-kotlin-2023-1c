@@ -2,9 +2,7 @@ package com.example.myfirstapp.ui
 
 
 import android.content.ContentValues
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -25,7 +23,6 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.outlined.Fastfood
 import androidx.compose.material.icons.outlined.Flight
@@ -129,8 +126,8 @@ fun StandardIconButton(accion : () -> Unit, icon : ImageVector, iconColorTintId:
 fun StandardBackButton(onBackClick: () -> Unit) {
     IconButton(onClick = onBackClick) {
         Icon(
-            imageVector = Icons.Default.ArrowBack,
-            contentDescription = "Back",
+            imageVector = icon,
+            contentDescription = null,
             tint = Color.Black,
             modifier = Modifier.size(24.dp)
         )

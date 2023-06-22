@@ -3,13 +3,11 @@ package com.example.myfirstapp
 import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -41,13 +39,10 @@ import com.google.firebase.ktx.Firebase
 
 class PersonalDataActivity : ComponentActivity() {
     private val home            = {startActivity(Intent(this, HomeActivity::class.java))}
-    private val registrarGastos = {startActivity(Intent(this, RegistrarGastosActivity::class.java))}
-    private val historialGastos = {startActivity(Intent(this, HistorialGastosActivity::class.java))}
     private val perfil          = {startActivity(Intent(this, ProfileActivity::class.java))}
     private val presupuestos    = {startActivity(Intent(this, PresupuestosActivity::class.java))}
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-    @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -64,9 +59,7 @@ class PersonalDataActivity : ComponentActivity() {
                         bottomBar = {
                             StandardNavigationAppBar(
                                 home            = home,
-                                registrarGastos = registrarGastos,
                                 perfil          = perfil,
-                                historialGastos = historialGastos,
                                 presupuestos    = presupuestos
                             )
                         }
@@ -78,7 +71,6 @@ class PersonalDataActivity : ComponentActivity() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     @Composable
     fun PersonalData() {
         val emailState = rememberSaveable { mutableStateOf("") }
@@ -199,7 +191,6 @@ class PersonalDataActivity : ComponentActivity() {
             }
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     @Preview(showBackground = true)
     @Composable
     fun GreetingPreview() {

@@ -2,11 +2,9 @@ package com.example.myfirstapp
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -56,7 +54,6 @@ class ProfileActivity : ComponentActivity() {
     /* Profile */
     private val datos = {startActivity(Intent(this, PersonalDataActivity::class.java))}
 
-    @RequiresApi(Build.VERSION_CODES.M)
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,9 +68,7 @@ class ProfileActivity : ComponentActivity() {
                     Scaffold(
                         bottomBar = { StandardNavigationAppBar(
                             home            = home,
-                            registrarGastos = registrarGastos,
                             perfil          = perfil,
-                            historialGastos = historialGastos,
                             presupuestos    = presupuestos)
                         }
                     ) {
@@ -143,7 +138,7 @@ class ProfileActivity : ComponentActivity() {
                 color = MaterialTheme.colorScheme.background
             ) {
                 Scaffold(
-                    bottomBar = { StandardNavigationAppBar(home=home,registrarGastos=registrarGastos, perfil = perfil, historialGastos=historialGastos, presupuestos=presupuestos) }
+                    bottomBar = { StandardNavigationAppBar(home=home, perfil = perfil, presupuestos=presupuestos) }
                 ) {
                     ProfileMenu()
                 }
