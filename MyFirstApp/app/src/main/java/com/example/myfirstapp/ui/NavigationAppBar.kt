@@ -19,7 +19,7 @@ import com.example.myfirstapp.R
 
 @Composable
 //@Preview
-fun StandardNavigationAppBar(home: () -> Unit, perfil: () -> Unit, presupuestos: () -> Unit) {
+fun StandardNavigationAppBar(home: () -> Unit, perfil: () -> Unit, presupuestos: () -> Unit, graficos: () -> Unit) {
     androidx.compose.material3.BottomAppBar(
         actions = {
             Row (
@@ -36,7 +36,7 @@ fun StandardNavigationAppBar(home: () -> Unit, perfil: () -> Unit, presupuestos:
                 StandardIconButton(accion = presupuestos, icon = Icons.Filled.Wallet)
 
                 // ESTADISTICAS / GRAFICOS
-                StandardIconButton(accion = { /*TODO*/ }, icon = Icons.Filled.Leaderboard)
+                StandardIconButton(accion = graficos, icon = Icons.Filled.Leaderboard)
             }
         },
         containerColor = colorResource(id = R.color.FourthColor),

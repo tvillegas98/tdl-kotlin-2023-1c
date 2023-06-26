@@ -2,11 +2,9 @@ package com.example.myfirstapp
 
 import com.example.myfirstapp.ui.DrawPieChart
 import android.annotation.SuppressLint
-import android.content.ContentValues
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -28,10 +26,9 @@ import com.example.myfirstapp.ui.theme.MyFirstAppTheme
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import java.util.*
 
 class HomeActivity : ComponentActivity() {
@@ -40,14 +37,23 @@ class HomeActivity : ComponentActivity() {
     private val historialGastos = {startActivity(Intent(this, HistorialGastosActivity::class.java))}
     private val perfil = {startActivity(Intent(this, ProfileActivity::class.java))}
     private val presupuestos = {startActivity(Intent(this, PresupuestosActivity::class.java))}
+    private val graficos = {startActivity(Intent(this, GraficosActivity::class.java))}
 
+    private var primeraVez = false
+
+
+    @OptIn(DelicateCoroutinesApi::class)
     @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
-        GlobalScope.launch {
-            actualizarPresupuestos()
+
+        if (!primeraVez) {
+            GlobalScope.launch {
+                actualizarPresupuestos()
+            }
+            primeraVez = true
         }
 
         setContent {
@@ -59,10 +65,13 @@ class HomeActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ) {
                     Scaffold(
-                        bottomBar = { StandardNavigationAppBar(
-                            home=home,
-                            perfil = perfil,
-                            presupuestos = presupuestos )
+                        bottomBar = {
+                            StandardNavigationAppBar(
+                                home=home,
+                                perfil = perfil,
+                                presupuestos = presupuestos,
+                                graficos = graficos
+                            )
                         },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -74,7 +83,6 @@ class HomeActivity : ComponentActivity() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     @Composable
     private fun HomeScreen() {
         val gastosPorCategoria: Map<String, Double> = obtenerGastoPorCategoria()
@@ -136,7 +144,6 @@ class HomeActivity : ComponentActivity() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     @Composable
     private fun obtenerGastoPorCategoria(): Map<String, Double> {
         val currentFirebaseUser = Firebase.auth.currentUser

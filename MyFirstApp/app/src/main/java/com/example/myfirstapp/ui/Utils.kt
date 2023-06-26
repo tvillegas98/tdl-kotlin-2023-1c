@@ -2,9 +2,7 @@ package com.example.myfirstapp.ui
 
 
 import android.content.ContentValues
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -67,7 +65,6 @@ val orangeColor = Color(0xFFFF8F00)
 val whiteColor = Color(0xFFFFFFFF)
 val coloresPieChart = listOf(greenColor,blueColor,yellowColor, redColor, orangeColor, pinkColor)
 
-@RequiresApi(Build.VERSION_CODES.M)
 @Composable
 fun StandardTextField(string: String, label: String, onValueChanged: (String) -> Unit, icon: ImageVector) {
     OutlinedTextField(

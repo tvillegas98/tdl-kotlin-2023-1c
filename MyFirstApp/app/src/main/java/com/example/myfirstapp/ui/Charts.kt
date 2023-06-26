@@ -21,14 +21,17 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import com.example.myfirstapp.ui.coloresPieChart
-import com.example.myfirstapp.ui.whiteColor
+import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.components.Legend
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.data.BarData
+import com.github.mikephil.charting.data.BarDataSet
+import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
-import com.github.mikephil.charting.highlight.Highlight
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import java.util.ArrayList
 
 // on below line we are adding different colors.
@@ -36,7 +39,7 @@ import java.util.ArrayList
 // on below line we are creating data class for
 // pie chart data and passing variable as browser
 // name and value.
-data class PieChartData(
+data class ChartData(
     var browserName: String?,
     var value: Double?
 )
@@ -143,13 +146,13 @@ fun DrawPieChart(gastosPorCatgoria: Map<String, Double>) {
     }
 }
 
-fun convertToPieChartData(gastosPorCatgoria: Map<String, Double>): List<PieChartData> {
-    val listaPieChartData = mutableListOf<PieChartData>()
+fun convertToPieChartData(gastosPorCatgoria: Map<String, Double>): List<ChartData> {
+    val listaPieChartData = mutableListOf<ChartData>()
 
     val sumaTotal = gastosPorCatgoria.values.sum()
 
     for ((clave, valor) in gastosPorCatgoria) {
-        val pieChartData = PieChartData(browserName = clave, value = (valor/sumaTotal) * 100)
+        val pieChartData = ChartData(browserName = clave, value = (valor/sumaTotal) * 100)
         listaPieChartData.add(pieChartData)
     }
     return  listaPieChartData
@@ -161,7 +164,7 @@ fun updatePieChartWithData(
     // on below line we are creating a variable
     // for pie chart and data for our list of data.
     chart: PieChart,
-    data: List<PieChartData>
+    data: List<ChartData>
 ) {
     // on below line we are creating
     // array list for the entries.
@@ -233,4 +236,137 @@ fun colorToArgb(coloresLista: List<Color>): List<Int> {
         color.toArgb()
     }
     return  res
+}
+
+
+@Composable
+fun DrawBarChart(frecCategoriaPorFecha: Map<String, Double>) {
+    val dataBarChart = convertToPieChartData(frecCategoriaPorFecha)
+
+    // on below line we are again creating a column
+    // with modifier and horizontal and vertical arrangement
+    Column(
+        modifier = Modifier.padding(top=18.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top
+    ) {
+        // on below line we are creating a column and
+        // specifying the horizontal and vertical arrangement
+        // and specifying padding from all sides.
+        Column(
+            modifier = Modifier
+                .padding(18.dp)
+                .size(450.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            // on below line we are creating a cross fade and
+            // specifying target state as pie chart data the
+            // method we have created in Pie chart data class.
+            Crossfade(targetState = dataBarChart) { pieChartData ->
+                // on below line we are creating an
+                // android view for pie chart.
+                AndroidView(factory = { context ->
+                    // on below line we are creating a pie chart
+                    // and specifying layout params.
+                    BarChart(context).apply {
+                        layoutParams = LinearLayout.LayoutParams(
+                            // on below line we are specifying layout
+                            // params as MATCH PARENT for height and width.
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                        )
+                        // on below line we are setting description
+                        // enables for our pie chart.
+                        this.description.isEnabled = false
+
+                        // on below line we are enabling legend.
+                        this.legend.isEnabled = true
+
+                        // on below line we are specifying
+                        // text size for our legend.
+                        this.legend.textSize = 14F
+
+                        // on below line we are specifying
+                        // alignment for our legend.
+                        this.legend.horizontalAlignment =
+                            Legend.LegendHorizontalAlignment.CENTER
+
+                        this.legend.isEnabled = false
+
+                        this.animateX(1000)
+
+                        val labels = frecCategoriaPorFecha.keys.toList()
+                        val xAxis = this.xAxis
+                        xAxis.valueFormatter = IndexAxisValueFormatter(labels)
+                        xAxis.position = XAxis.XAxisPosition.BOTTOM
+                        xAxis.setDrawGridLines(false)
+                        xAxis.granularity = 1f
+                        xAxis.textSize = 15f
+                        xAxis.typeface = Typeface.DEFAULT_BOLD
+                        // on below line we are specifying entry label color as white.
+                        //this.setEntryLabelColor(R.color.white)
+                    }
+                },
+                    // on below line we are specifying modifier
+                    // for it and specifying padding to it.
+                    modifier = Modifier
+                        .wrapContentSize()
+                        .padding(5.dp), update = {
+                        // on below line we are calling update pie chart
+                        // method and passing pie chart and list of data.
+                        updateBarChartWithData(it, pieChartData)
+                    }
+                )
+            }
+        }
+    }
+}
+
+fun updateBarChartWithData(chart: BarChart, data: List<ChartData>) {
+        // on below line we are creating
+        // array list for the entries.
+        val entries = ArrayList<BarEntry>()
+
+        // on below line we are running for loop for
+        // passing data from list into entries list.
+        for (i in data.indices) {
+            val item = data[i]
+            entries.add(BarEntry(i.toFloat(), item.value?.toFloat() ?: 0.toFloat()))
+        }
+
+        // on below line we are creating
+        // a variable for pie data set.
+        val ds = BarDataSet(entries, "Prueba")
+
+        // Convierto la lista de colores en una lista de colores Argb
+        val colores = colorToArgb(coloresPieChart)
+
+        // on below line we are specifying color
+        // int the array list from colors.
+        ds.colors = colores
+
+        // on below line we are specifying text color
+//        ds.valueTextColor = whiteColor.toArgb()
+
+        // on below line we are specifying
+        // text size for value.
+        ds.valueTextSize = 15f
+
+        // on below line we are specifying type face as bold.
+        ds.valueTypeface = Typeface.DEFAULT_BOLD
+
+        ds.setDrawValues(false)
+
+        // on below line we are creating
+        // a variable for pie data
+        val d = BarData(ds)
+
+        // on below line we are setting this
+        // pie data in chart data.
+        chart.data = d
+
+        // on below line we are
+        // calling invalidate in chart.
+        chart.invalidate()
 }

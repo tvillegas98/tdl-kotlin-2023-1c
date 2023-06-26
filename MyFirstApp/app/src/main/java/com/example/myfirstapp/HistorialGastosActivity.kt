@@ -63,6 +63,7 @@ class HistorialGastosActivity : ComponentActivity() {
     private val perfil = {startActivity(Intent(this, ProfileActivity::class.java))}
     private val presupuestos = {startActivity(Intent(this, PresupuestosActivity::class.java))}
     private val historialGastos = {startActivity(Intent(this, HistorialGastosActivity::class.java))}
+    private val graficos = {startActivity(Intent(this, GraficosActivity::class.java))}
 
     private var filtroCategoria : String? = null
     private var filtroFuente : String? = null
@@ -93,10 +94,13 @@ class HistorialGastosActivity : ComponentActivity() {
                         topBar = {
                             StandardTopAppBar(onBackClick=home)
                         },
-                        bottomBar = { StandardNavigationAppBar(
-                            home=home,
-                            perfil = perfil,
-                            presupuestos = presupuestos )
+                        bottomBar = {
+                            StandardNavigationAppBar(
+                                home=home,
+                                perfil = perfil,
+                                presupuestos = presupuestos,
+                                graficos = graficos
+                            )
                         },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -149,7 +153,7 @@ class HistorialGastosActivity : ComponentActivity() {
                             gastoList.add("Precio: $$it")
                         }
                         document.getDate("date")?.let { date ->
-                            val formateoFecha = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+                            val formateoFecha = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                             val fecha = formateoFecha.format(date)
                             gastoList.add("Fecha: $fecha")
                         }
