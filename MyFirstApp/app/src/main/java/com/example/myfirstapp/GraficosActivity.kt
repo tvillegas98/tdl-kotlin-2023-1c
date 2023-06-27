@@ -8,22 +8,24 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material3.Card
-import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DateRangePicker
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberDateRangePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -31,9 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -46,6 +46,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
+import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
 import java.util.Calendar
@@ -94,15 +95,18 @@ class GraficosActivity : ComponentActivity() {
     @Composable
     private fun ResumenGeneral() {
         val initialDate = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli()
-        val datePickerState = rememberDatePickerState(initialSelectedDateMillis = initialDate)
+        val datePickerState = rememberDateRangePickerState(
+            initialSelectedStartDateMillis = initialDate,
+            initialSelectedEndDateMillis = initialDate,
+            yearRange = IntRange(2023, 2023)
+        )
         val showDialog = rememberSaveable { mutableStateOf(false) }
-
         Column (
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         )
         {
-            StandardButton(onClick = {showDialog.value = true}, label = "Seleccionar Fecha")
+            StandardButton(onClick = {showDialog.value = true}, label = "Seleccionar Rango de Fechas")
 
             if (showDialog.value) {
                 DatePickerDialog(
@@ -112,52 +116,97 @@ class GraficosActivity : ComponentActivity() {
                             onClick = { showDialog.value = false }
                         )
                         {
-                            Text("Ok")
+                            Text("Confirmar")
                         }
                     },
                     dismissButton = {
                         TextButton(onClick = { showDialog.value = false }) {
-                            Text("Cancel")
+                            Text("Cancelar")
                         }
                     }
                 ) {
-                    DatePicker(state = datePickerState)
+                    DateRangePicker(
+                        modifier = Modifier.weight(1f),
+                        state = datePickerState,
+                        dateValidator = {timestamp ->
+                            timestamp < Instant.now().toEpochMilli()
+                        },
+                        title = {
+                            Text(
+                                modifier = Modifier.padding(8.dp),
+                                text = "Selecciona un Rango de Fechas"
+                            )
+                        },
+                    )
                 }
             } else {
-                datePickerState.selectedDateMillis?.let {
-                    val fechaSeleccionada = milisecToDate(datePickerState.selectedDateMillis!!)
-                    BarPlotPorFecha(fechaSeleccionada)
+                if (datePickerState.selectedStartDateMillis != null && datePickerState.selectedEndDateMillis!= null) {
+                    val fechaInicio = milisecToDate(datePickerState.selectedStartDateMillis!!)
+                    val fechaFin = milisecToDate(datePickerState.selectedEndDateMillis!!)
+                    BarPlotPorFecha(fechaInicio, fechaFin)
                 }
             }
         }
     }
 
     @Composable
-    private fun BarPlotPorFecha(fecha: String) {
-        val frecCategoriaPorFecha : Map<String,Double>  = frecuenciaCategoriaPorFecha(fecha)
+    private fun BarPlotPorFecha(fechaInicio: String, fechaFin: String) {
+        val frecCategoriaPorFecha : Map<String,Double>  = frecuenciaCategoriaPorFecha(fechaInicio, fechaFin)
         if (frecCategoriaPorFecha.isEmpty()) {
-            Card (
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .fillMaxSize()
+                    .background(color = Color.White)
             ) {
-                Text(text="No hay gastos registrados el $fecha", textAlign = TextAlign.Center)
+
+                Card(
+                ) {
+                    if (fechaInicio == fechaFin) {
+                        Text(
+                            text = "No hay gastos registrados el $fechaInicio",
+                            textAlign = TextAlign.Justify,
+                            modifier = Modifier
+                                .background(color = Color.White)
+                        )
+                    } else {
+                        Text(
+                            text = "No hay gastos registrados entre\t\n  el $fechaInicio y el $fechaFin",
+                            textAlign = TextAlign.Justify,
+                            modifier = Modifier
+                                .background(color = Color.White)
+                        )
+                    }
+                }
             }
         } else {
             Spacer(modifier = Modifier.width(25.dp))
 
             Text(
-                text = "Distribucion de Gastos del $fecha",
-                fontSize = 20.sp
+                text = "Distribucion de Gastos entre el $fechaInicio y el $fechaFin",
+                fontSize = 20.sp,
+                textAlign = TextAlign.Justify
             )
             DrawBarChart(frecCategoriaPorFecha = frecCategoriaPorFecha)
         }
     }
 
     @Composable
-    private fun frecuenciaCategoriaPorFecha(fecha: String): Map<String, Double> {
+    private fun frecuenciaCategoriaPorFecha(fechaInicio: String, fechaFin: String): Map<String, Double> {
         val currentFirebaseUser = Firebase.auth.currentUser
         val db = Firebase.firestore
         val gastosPorCategoria= remember { mutableStateOf(emptyMap<String, Double>()) }
+        val formateoFecha = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+
+        // Preparo las fechas para poder comparar
+        val formatFechaInicio = formateoFecha.parse(fechaInicio)
+        val formatFechaFin = formateoFecha.parse(fechaFin)
+        val startCalendar = Calendar.getInstance()
+        startCalendar.time = formatFechaInicio
+        val endCalendar = Calendar.getInstance()
+        endCalendar.time = formatFechaFin
+
 
         LaunchedEffect(Unit) {
             db.collection("gastos")
@@ -167,10 +216,10 @@ class GraficosActivity : ComponentActivity() {
                     val tempMap = mutableMapOf<String, Double>()
                     for (document in querySnapshot) {
                         document.getDate("date")?.let { date ->
-                            val formateoFecha = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                            val fechaGasto = formateoFecha.format(date)
+                            val calendar = Calendar.getInstance()
+                            calendar.time = date
 
-                            if (fechaGasto == fecha) {
+                            if (calendar in startCalendar..endCalendar) {
                                 document.getString("category")?.let{categoria ->
                                     val frecuenciaActual = tempMap.getOrDefault(key = categoria, defaultValue = 0.0)
                                     tempMap[categoria] = frecuenciaActual + 1
