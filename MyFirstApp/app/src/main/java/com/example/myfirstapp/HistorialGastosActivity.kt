@@ -92,7 +92,7 @@ class HistorialGastosActivity : ComponentActivity() {
                 ) {
                     Scaffold(
                         topBar = {
-                            StandardTopAppBar(onBackClick=home)
+                            StandardTopAppBar(onBackClick=home, title = "Historial de Gastos")
                         },
                         bottomBar = {
                             StandardNavigationAppBar(
@@ -408,12 +408,24 @@ class HistorialGastosActivity : ComponentActivity() {
     @Composable
     private fun ListarHistorial(gastos: MutableState<List<List<String>>>) {
         if (gastos.value.isEmpty()) {
-            Card(
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(30.dp)
+                    .background(color = colorResource(id = R.color.PrimaryColor))
             ) {
-                Text(text = "No hay gastos registrados")
+                Card(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(30.dp)
+                ) {
+                    Text(
+                        text = "No hay gastos registrados",
+                        modifier = Modifier
+                            .background(color = colorResource(id = R.color.PrimaryColor))
+                    )
+                }
             }
         } else {
             gastos.value.forEach { lista ->

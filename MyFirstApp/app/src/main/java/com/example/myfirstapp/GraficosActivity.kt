@@ -137,6 +137,7 @@ class GraficosActivity : ComponentActivity() {
                                 text = "Selecciona un Rango de Fechas"
                             )
                         },
+                        showModeToggle = false
                     )
                 }
             } else {
@@ -166,14 +167,14 @@ class GraficosActivity : ComponentActivity() {
                     if (fechaInicio == fechaFin) {
                         Text(
                             text = "No hay gastos registrados el $fechaInicio",
-                            textAlign = TextAlign.Justify,
+                            textAlign = TextAlign.Center,
                             modifier = Modifier
                                 .background(color = Color.White)
                         )
                     } else {
                         Text(
-                            text = "No hay gastos registrados entre\t\n  el $fechaInicio y el $fechaFin",
-                            textAlign = TextAlign.Justify,
+                            text = "No hay gastos registrados entre\t\nel $fechaInicio y el $fechaFin",
+                            textAlign = TextAlign.Center,
                             modifier = Modifier
                                 .background(color = Color.White)
                         )
@@ -184,9 +185,9 @@ class GraficosActivity : ComponentActivity() {
             Spacer(modifier = Modifier.width(25.dp))
 
             Text(
-                text = "Distribucion de Gastos entre el $fechaInicio y el $fechaFin",
+                text = "Cantidad de Gastos entre\t\nel $fechaInicio y el $fechaFin",
                 fontSize = 20.sp,
-                textAlign = TextAlign.Justify
+                textAlign = TextAlign.Center
             )
             DrawBarChart(frecCategoriaPorFecha = frecCategoriaPorFecha)
         }

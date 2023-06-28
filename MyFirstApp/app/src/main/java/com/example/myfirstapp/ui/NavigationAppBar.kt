@@ -4,6 +4,7 @@ package com.example.myfirstapp.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -14,6 +15,7 @@ import androidx.compose.material.icons.filled.Wallet
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.myfirstapp.R
 
@@ -45,12 +47,17 @@ fun StandardNavigationAppBar(home: () -> Unit, perfil: () -> Unit, presupuestos:
 
 @Composable
 fun StandardTopAppBar(
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    title : String? = null
 ) {
     TopAppBar(
-        title = { null },
+        title = {
+            if (title != null) {
+                Text(text= title, textAlign = TextAlign.Center)
+            }
+        },
         navigationIcon = {
-            // StandardTopIconButton(onBackClick, Icons.Default.ArrowBack)
+            StandardIconButton(onBackClick, Icons.Default.ArrowBack, iconColorTintId= R.color.black)
         },
         backgroundColor = colorResource(id = R.color.FourthColor),
         elevation = 0.dp
