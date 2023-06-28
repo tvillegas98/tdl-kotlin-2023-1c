@@ -33,6 +33,7 @@ import com.example.myfirstapp.ui.DropdownMenu
 import com.example.myfirstapp.ui.StandardNumberField
 import com.example.myfirstapp.ui.StandardTextField
 import com.example.myfirstapp.ui.StandardNavigationAppBar
+import com.example.myfirstapp.ui.StandardTopAppBar
 import com.example.myfirstapp.ui.obtenerDocumentos
 import com.example.myfirstapp.ui.theme.MyFirstAppTheme
 import com.google.firebase.Timestamp
@@ -59,6 +60,9 @@ class RegistrarGastosActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     Scaffold(
+                        topBar = {
+                            StandardTopAppBar(onBackClick=home, title = "Registrar Gasto")
+                        },
                         bottomBar = {
                             StandardNavigationAppBar(
                                 home=home,

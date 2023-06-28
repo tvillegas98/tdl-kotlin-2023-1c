@@ -4,6 +4,7 @@ package com.example.myfirstapp.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
@@ -53,7 +54,11 @@ fun StandardTopAppBar(
     TopAppBar(
         title = {
             if (title != null) {
-                Text(text= title, textAlign = TextAlign.Center)
+                Text(
+                    text= title,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(start=10.dp)
+                )
             }
         },
         navigationIcon = {

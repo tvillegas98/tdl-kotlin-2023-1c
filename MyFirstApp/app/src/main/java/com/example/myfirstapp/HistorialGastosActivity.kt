@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardActionScope
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -45,6 +44,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import com.example.myfirstapp.ui.OutlinedTextFieldBackground
 import com.example.myfirstapp.ui.StandardNavigationAppBar
 import com.example.myfirstapp.ui.StandardTopAppBar
 import com.example.myfirstapp.ui.obtenerDocumentos
@@ -210,29 +210,30 @@ class HistorialGastosActivity : ComponentActivity() {
     private fun BarraBusqueda() {
         var busqueda:      String by remember {mutableStateOf("")}
 
-        OutlinedTextField(
-            value = busqueda,
-            onValueChange = { busqueda = it },
-            label = { Text("Buscar Titulo") },
-            modifier = Modifier.background(color = colorResource(id = R.color.white)),
-            trailingIcon = {
-                IconButton(
-                    onClick = { buscarTitulo(busqueda) }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Buscar",
-                        tint = Color.Gray
-                    )
-                }
-            },
-            keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Search // Define el tipo de acción del botón "Enter"
-            ),
-            keyboardActions = KeyboardActions(
-                onSearch = { buscarTitulo(busqueda) }
+        OutlinedTextFieldBackground(colorResource(id = R.color.white)) {
+            OutlinedTextField(
+                value = busqueda,
+                onValueChange = { busqueda = it },
+                label = { Text("Buscar Titulo") },
+                trailingIcon = {
+                    IconButton(
+                        onClick = { buscarTitulo(busqueda) }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Buscar",
+                            tint = Color.Gray
+                        )
+                    }
+                },
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Search // Define el tipo de acción del botón "Enter"
+                ),
+                keyboardActions = KeyboardActions(
+                    onSearch = { buscarTitulo(busqueda) }
+                )
             )
-        )
+        }
     }
 
     @Composable
