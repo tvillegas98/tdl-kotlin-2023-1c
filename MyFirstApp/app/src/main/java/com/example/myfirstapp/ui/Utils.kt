@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
@@ -75,7 +76,10 @@ fun StandardTextField(string: String, label: String, onValueChanged: (String) ->
         onValueChange = { newValue -> onValueChanged(newValue) },
         label = { Text(label) },
         leadingIcon = { Icon(imageVector = icon, contentDescription = null)} ,
-        modifier = Modifier.background(color = colorResource(id = R.color.white))
+        modifier = Modifier
+            .background(color = colorResource(id = R.color.white))
+            .widthIn(min = 350.dp, max= 350.dp),
+        singleLine = true
     )
 }
 
