@@ -3,13 +3,12 @@ package com.example.myfirstapp
 import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -50,15 +49,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.myfirstapp.ui.StandardIconButton
 import com.example.myfirstapp.ui.StandardTextField
 import com.example.myfirstapp.ui.StandardTopAppBar
 import com.example.myfirstapp.ui.theme.MyFirstAppTheme
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Filter
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
@@ -82,7 +84,7 @@ data class Request(
 
 data class Contact(
     val email:  String,
-    val id:     String
+    val id: String
 )
 
 class ContactsActivity : ComponentActivity() {
@@ -90,9 +92,8 @@ class ContactsActivity : ComponentActivity() {
     private val db = Firebase.firestore
     private val currentFirebaseUser                 = Firebase.auth.currentUser
     private val currentFirebaseUserId: String       = currentFirebaseUser!!.uid
-    private val currentFirebaseUserEmail: String? = currentFirebaseUser?.email
+    private val currentFirebaseUserEmail: String?   = currentFirebaseUser!!.email
 
-    @RequiresApi(Build.VERSION_CODES.M)
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -115,7 +116,6 @@ class ContactsActivity : ComponentActivity() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     @Composable
     fun ContactsLayer() {
         var requestType by remember { mutableStateOf(RequestType.INCOMING) }
@@ -148,7 +148,6 @@ class ContactsActivity : ComponentActivity() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     @Composable
     fun AddNewContactSection() {
         var newContactEmail by remember { mutableStateOf("") }
@@ -199,20 +198,69 @@ class ContactsActivity : ComponentActivity() {
         val requesterEmail  = currentFirebaseUserEmail
         val requestedId     = getIdByEmail(requestedEmail)
 
-        if (requestedId == "" || requesterEmail == null) {
-            return
+        if (requestedEmail == currentFirebaseUserEmail) {
+            Toast.makeText(
+                baseContext,
+                "You can not send a request to yourself!",
+                Toast.LENGTH_SHORT,
+            ).show()
         } else {
-            registerRequest(
-                requesterId,
-                requesterEmail,
-                requestedId,
-                requestedEmail
-            )
+            val query = db.collection("contactRequests")
+                .where(
+                    Filter.or(
+                        Filter.and(
+                            Filter.equalTo("requesterEmail", currentFirebaseUserEmail),
+                            Filter.equalTo("requestedEmail", requestedEmail)
+                        ),
+                        Filter.and(
+                            Filter.equalTo("requesterEmail", requestedEmail),
+                            Filter.equalTo("requestedEmail", currentFirebaseUserEmail)
+                        )
+                    )
+                )
+
+            query.get()
+                .addOnSuccessListener { querySnapshot->
+                    if (querySnapshot.isEmpty) {
+                        if (requestedId != "" && requesterEmail != null) {
+                            registerRequest(
+                                requesterId,
+                                requesterEmail,
+                                requestedId,
+                                requestedEmail
+                            )
+                        }
+                    } else {
+                        when (querySnapshot.documents.first().get("state") as String) {
+                            "Pending" -> {
+                                Toast.makeText(
+                                    baseContext,
+                                    "There is already a contact request between you!",
+                                    Toast.LENGTH_SHORT,
+                                ).show()
+                            }
+                            "Accepted" -> {
+                                Toast.makeText(
+                                    baseContext,
+                                    "You are contacts already!",
+                                    Toast.LENGTH_SHORT,
+                                ).show()
+                            }
+                            else -> {
+                                Toast.makeText(
+                                    baseContext,
+                                    "Unusual state registered!",
+                                    Toast.LENGTH_SHORT,
+                                ).show()
+                            }
+                        }
+                    }
+                }
         }
     }
 
     // Devuelve el Id del usuario que posee dicho email en sus datos.
-    suspend fun getIdByEmail(email : String): String {
+    private suspend fun getIdByEmail(email : String): String {
         val db  = Firebase.firestore
         val id  = ""
 
@@ -242,12 +290,13 @@ class ContactsActivity : ComponentActivity() {
         requestedEmail: String
     ) {
         val request = hashMapOf(
-                                "date"                  to Timestamp(Date()),
-                                "requesterId"           to requesterId,
-                                "requesterEmail"        to requesterEmail,
-                                "requestedId"           to requestedId,
-                                "requestedEmail"        to requestedEmail
-                                )
+            "date"                  to Timestamp(Date()),
+            "requesterId"           to requesterId,
+            "requesterEmail"        to requesterEmail,
+            "requestedId"           to requestedId,
+            "requestedEmail"        to requestedEmail,
+            "state"                 to "Pending"
+        )
 
         db.collection("contactRequests")
             .add(request)
@@ -264,29 +313,15 @@ class ContactsActivity : ComponentActivity() {
             }
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     @Composable
     fun ContactsSection(requestType: RequestType) {
         // Inicializamos las listas para luego tomar los datos de FB, mostrarlos en pantalla y modificarlos mediante la misma.
-        var contacts: List<Contact> by remember { mutableStateOf(emptyList()) }
         var requests: List<Request> by remember { mutableStateOf(emptyList()) }
 
         LaunchedEffect(requestType) {
-            contacts = emptyList()
             requests = emptyList()
-
-            when (requestType) {
-                RequestType.CONTACTS -> {
-                    getContacts { fetchedContacts ->
-                        contacts = fetchedContacts
-                    }
-                }
-
-                else -> {
-                    getRequests(requestType) {fetchedRequests ->
-                        requests = fetchedRequests
-                    }
-                }
+            getRequests(requestType) { fetchedRequests ->
+                requests = fetchedRequests
             }
         }
 
@@ -297,55 +332,8 @@ class ContactsActivity : ComponentActivity() {
                 .padding(bottom = 80.dp)
         ) {
             // En función de lo seleccionado por el usuario, mostramos solicitudes o contactos
-            if (requestType == RequestType.CONTACTS) {
-                ShowContacts(contacts)
-            } else {
-                ShowRequests(requests, requestType)
-            }
+            ShowRequests(requests, requestType)
         }
-    }
-
-    private fun deleteBothContacts(firstContact: Contact, secondContact: Contact) {
-        deleteContact(contactToDelete = secondContact, from = firstContact)
-        deleteContact(contactToDelete = firstContact, from = secondContact)
-    }
-
-    private fun deleteContact(contactToDelete: Contact, from: Contact) {
-        val query = db.collection("contacts").whereEqualTo("userId", from.id)
-        query.get()
-            .addOnSuccessListener { querySnapshot ->
-                if (!querySnapshot.isEmpty) {
-                    val document = querySnapshot.documents.first()
-                    val data = document.data?.toMutableMap()
-
-                    if (data != null) {
-                        data.remove(contactToDelete.email)
-                        document.reference
-                            .set(data)
-                            .addOnSuccessListener {
-                                Toast.makeText(
-                                    baseContext,
-                                    "Contact successfully deleted.",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                            .addOnFailureListener { exception ->
-                                Toast.makeText(
-                                    baseContext,
-                                    "Error deleting contact: ${exception.message}",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                    }
-                }
-            }
-            .addOnFailureListener { exception ->
-                Toast.makeText(
-                    baseContext,
-                    "Error deleting contact: ${exception.message}",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
     }
 
     @Composable
@@ -395,85 +383,98 @@ class ContactsActivity : ComponentActivity() {
                                 )
                             }
 
-                            else -> {}
+                            else -> {
+                                // Si quien hizo la solicitud es el usuario.
+                                val contact: Contact = when (request.requesterId) {
+                                    currentFirebaseUserId -> {
+                                        Contact(request.requestedEmail, request.requestedId)
+                                    }
+                                    else -> {
+                                        Contact(request.requesterEmail, request.requesterId)
+                                    }
+                                }
+                                Text(contact.email)
+                                StandardIconButton(
+                                    accion = {
+                                        deleteRequest(request)
+                                    },
+                                    icon = Icons.Outlined.Delete,
+                                    iconColorTintId = R.color.white,
+                                    iconBackgroundColorId = R.color.red
+                                )
+                            }
                         }
                     }
                 }
             }
         } else {
-            // Idealmente poner un icono o algo para hacer mas linda la UI.
-            Text(text = "No requests pending !.")
-        }
-    }
-    @Composable
-    private fun ShowContacts(contacts: List<Contact>) {
-        val actualUserContact: Contact? = currentFirebaseUserEmail?.let { Contact(email = it, id = currentFirebaseUserId) }
-        // Lo mismo si obtuvimos contactos.
-        if (contacts.isNotEmpty()) {
-            contacts.forEach { contact ->
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(10.dp),
-                    elevation = 8.dp,
-                    shape = RoundedCornerShape(8.dp),
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(15.dp),
-                        horizontalArrangement = Arrangement.SpaceAround,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(contact.email)
-                        StandardIconButton(
-                            accion = {
-                                if (actualUserContact != null) {
-                                    deleteBothContacts(actualUserContact, contact)
-                                }
-                            },
-                            icon = Icons.Outlined.Delete,
-                            iconColorTintId = R.color.white,
-                            iconBackgroundColorId = R.color.red
-                        )
+            Image(
+                painter = when (requestType) {
+                    RequestType.CONTACTS -> {
+                        painterResource(R.drawable.contacts_gohsantosadrive)
                     }
-                }
-            }
-        } else {
-            // Idealmente poner un icono o algo para hacer mas linda la UI.
-            Text(text = "You do not have any contact, what are you waiting for ?")
+
+                    RequestType.INCOMING -> {
+                        painterResource(R.drawable.incoming_vectorsmarket15)
+                    }
+
+                    else -> {
+                        painterResource(R.drawable.outgoing_vectorsmarket15)
+                    }
+                },
+                contentDescription = "Image",
+                modifier = Modifier.fillMaxSize().height(300.dp)
+            )
+
+            Text(
+                text = when (requestType) {
+                    RequestType.CONTACTS -> {
+                        "You do not have any contacts yet !"
+                    }
+
+                    RequestType.INCOMING -> {
+                        "No incoming requests here.."
+                    }
+
+                    else -> {
+                        "It seems that you did not send contact requests.."
+                    }
+                },
+                minLines = 2,
+                maxLines = 2,
+                textAlign = TextAlign.Center,
+                style = TextStyle(fontSize = 30.sp),
+                modifier = Modifier.padding(10.dp)
+            )
         }
     }
 
     // Las siguientes funciones manejan las maneras posibles de afectar una solicitud.
     private fun acceptRequest(request: Request) {
-        saveContact(request.requesterId, request.requestedId, request.requestedEmail)
-        saveContact(request.requestedId, request.requesterId, request.requesterEmail)
-        deleteRequest(request)
+        saveContacts(request.requesterId, request.requestedId)
+        Toast.makeText(
+            baseContext,
+            "Contact succesfully added.",
+            Toast.LENGTH_SHORT,
+        ).show()
     }
 
-    private fun saveContact(userId: String, newContactId: String, newContactEmail: String) {
-        val contactsCollection = FirebaseFirestore.getInstance().collection("contacts")
-        val userContactsRef = contactsCollection.document(userId)
-        db.runTransaction { transaction ->
-            val userContactsDoc = transaction.get(userContactsRef)
+    private fun saveContacts(requesterId: String, requestedId: String) {
+        val query = db.collection("contactRequests")
+            .whereEqualTo("requesterId", requesterId)
+            .whereEqualTo("requestedId", requestedId)
 
-            if (!userContactsDoc.exists()) {
-                val newContactMap = mapOf(
-                    "userId"        to userId,
-                    newContactEmail to newContactId
-                )
-                transaction.set(userContactsRef, newContactMap)
-            } else {
-                val existingContacts = userContactsDoc.data?.toMutableMap()
-
-                if (!existingContacts?.containsKey(newContactEmail)!!) {
-                    existingContacts[newContactEmail] = newContactId
-                    transaction.update(userContactsRef, existingContacts)
-                } else {
-
+        query.get().addOnSuccessListener { querySnapshot ->
+            val documentReference = querySnapshot.documents.first().reference
+            db.runTransaction { transaction ->
+                val snapshot = transaction.get(documentReference)
+                val state = snapshot.data?.get("state") as? String
+                if (state == "Pending") {
+                    transaction.update(documentReference, "state", "Accepted")
                 }
             }
+        }.addOnFailureListener {
+            // Manejo de errores
         }
     }
 
@@ -515,20 +516,32 @@ class ContactsActivity : ComponentActivity() {
         val collectionRef = db.collection("contactRequests")
 
         val query =  when (type) {
-            RequestType.INCOMING -> collectionRef.whereEqualTo("requestedId", currentFirebaseUserId)
-            RequestType.OUTGOING -> collectionRef.whereEqualTo("requesterId", currentFirebaseUserId)
-            else -> null
+            RequestType.INCOMING    -> collectionRef
+                                                    .whereEqualTo("requestedId", currentFirebaseUserId)
+                                                    .whereEqualTo("state", "Pending")
+            RequestType.OUTGOING    -> collectionRef
+                                                    .whereEqualTo("requesterId", currentFirebaseUserId)
+                                                    .whereEqualTo("state", "Pending")
+            else                    -> collectionRef
+                                                    .whereEqualTo("state", "Accepted")
+                                                    .where(
+                                                            Filter.or(
+                                                                Filter.equalTo("requesterId", currentFirebaseUserId),
+                                                                Filter.equalTo("requestedId", currentFirebaseUserId)
+                                                            )
+                                                        )
+
         }
 
-        query?.get()
-            ?.addOnSuccessListener { querySnapshot ->
+        query.get()
+            .addOnSuccessListener { querySnapshot ->
                 val requests = mutableListOf<Request>()
                 for (document in querySnapshot.documents) {
                     val request = Request(
-                        requesterId     = document.get("requesterId") as String,
-                        requesterEmail  = document.get("requesterEmail") as String,
-                        requestedId     = document.get("requestedId") as String,
-                        requestedEmail  = document.get("requestedEmail") as String,
+                        requesterId     = document.get("requesterId")       as String,
+                        requesterEmail  = document.get("requesterEmail")    as String,
+                        requestedId     = document.get("requestedId")       as String,
+                        requestedEmail  = document.get("requestedEmail")    as String,
                         requestType     = type
                     )
                     requests.add(request)
@@ -540,7 +553,7 @@ class ContactsActivity : ComponentActivity() {
                 ).show()
                 callback(requests)
             }
-            ?.addOnFailureListener {
+            .addOnFailureListener {
                 Toast.makeText(
                     baseContext,
                     "Error while getting your incoming requests.",
@@ -549,58 +562,4 @@ class ContactsActivity : ComponentActivity() {
             }
     }
 
-    private fun getContacts(callback: (List<Contact>) -> Unit) {
-        val collectionRef = db.collection("contacts")
-        val query = collectionRef.whereEqualTo("userId", currentFirebaseUserId)
-
-        query.get()
-            .addOnSuccessListener { querySnapshot ->
-                val contacts = mutableListOf<Contact>()
-                val data = querySnapshot.documents.first().data
-                if (data != null) {
-                    for ((email, id) in data) {
-                        if (email != "userId") {
-                            contacts.add(
-                                Contact(
-                                    email   = email,
-                                    id      = id as String
-                                )
-                            )
-                        }
-                    }
-                    Toast.makeText(
-                        baseContext,
-                        "Contactos cargados con exito. Hay ${contacts.size} contactos",
-                        Toast.LENGTH_SHORT,
-                    ).show()
-                    callback(contacts)
-                } else {
-                    Toast.makeText(
-                        baseContext,
-                        "Error",
-                        Toast.LENGTH_SHORT,
-                    ).show()
-                }
-            }
-            .addOnFailureListener {
-                Toast.makeText(
-                    baseContext,
-                    "Error while getting your contacts.",
-                    Toast.LENGTH_SHORT,
-                ).show()
-            }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.M)
-    @Preview(
-        showBackground = true,
-        widthDp = 393,
-        heightDp = 851
-    )
-    @Composable
-    fun GreetingPreview() {
-        MyFirstAppTheme {
-            ContactsLayer()
-        }
-    }
 }
