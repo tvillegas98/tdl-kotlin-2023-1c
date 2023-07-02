@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -132,7 +134,7 @@ class InicioActivity : ComponentActivity() {
         ) {
             Text(text="Bienvenid@!", style=MaterialTheme.typography.h3)
             Spacer(modifier = Modifier.weight(.02f))
-            StandardTextField(string = email, label ="email", onValueChanged = { email = it }, Icons.Default.Email)
+            StandardTextField(string = email, label ="Email", onValueChanged = { email = it }, Icons.Default.Email)
             PasswordTextField(password = password, onValueChanged = { password = it })
             SignInButton(email = email, password = password)
             Spacer(modifier = Modifier.weight(1f))

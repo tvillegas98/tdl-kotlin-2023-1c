@@ -17,7 +17,6 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.MaterialTheme
@@ -45,11 +44,10 @@ import com.google.firebase.ktx.Firebase
 class ProfileActivity : ComponentActivity() {
     /* NavBar */
     private val home            = { startActivity(Intent(this, HomeActivity::class.java)) }
-    private val registrarGastos = { startActivity(Intent(this, RegistrarGastosActivity::class.java)) }
-    private val historialGastos = { startActivity(Intent(this, HistorialGastosActivity::class.java)) }
     private val perfil          = { startActivity(Intent(this, ProfileActivity::class.java)) }
     private val presupuestos    = { startActivity(Intent(this, PresupuestosActivity::class.java)) }
     private val contactos       = { startActivity(Intent(this, ContactsActivity::class.java)) }
+    private val graficos = {startActivity(Intent(this, GraficosActivity::class.java))}
 
     /* Profile */
     private val datos = {startActivity(Intent(this, PersonalDataActivity::class.java))}
@@ -66,10 +64,13 @@ class ProfileActivity : ComponentActivity() {
                     color = colorResource(id = R.color.white)
                 ) {
                     Scaffold(
-                        bottomBar = { StandardNavigationAppBar(
-                            home            = home,
-                            perfil          = perfil,
-                            presupuestos    = presupuestos)
+                        bottomBar = {
+                            StandardNavigationAppBar(
+                                home=home,
+                                perfil = perfil,
+                                presupuestos = presupuestos,
+                                graficos = graficos
+                            )
                         }
                     ) {
                         ProfileMenu()
@@ -138,7 +139,7 @@ class ProfileActivity : ComponentActivity() {
                 color = MaterialTheme.colorScheme.background
             ) {
                 Scaffold(
-                    bottomBar = { StandardNavigationAppBar(home=home, perfil = perfil, presupuestos=presupuestos) }
+                    bottomBar = { StandardNavigationAppBar(home=home, perfil = perfil, presupuestos=presupuestos, graficos=graficos) }
                 ) {
                     ProfileMenu()
                 }

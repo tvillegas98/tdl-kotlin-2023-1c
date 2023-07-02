@@ -66,6 +66,7 @@ class PresupuestosActivity : ComponentActivity() {
     private val home = {startActivity(Intent(this, HomeActivity::class.java))}
     private val perfil = {startActivity(Intent(this, ProfileActivity::class.java))}
     private val presupuestos = {startActivity(Intent(this, PresupuestosActivity::class.java))}
+    private val graficos = {startActivity(Intent(this, GraficosActivity::class.java))}
 
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -94,7 +95,8 @@ class PresupuestosActivity : ComponentActivity() {
                         StandardNavigationAppBar(
                             home=home,
                             perfil = perfil,
-                            presupuestos = presupuestos
+                            presupuestos = presupuestos,
+                            graficos = graficos
                         )
                     }) {
                         ListarPresupuestos()

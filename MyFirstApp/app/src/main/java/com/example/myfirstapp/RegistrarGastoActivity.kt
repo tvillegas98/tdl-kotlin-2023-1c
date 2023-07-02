@@ -33,6 +33,7 @@ import com.example.myfirstapp.ui.DropdownMenu
 import com.example.myfirstapp.ui.StandardNumberField
 import com.example.myfirstapp.ui.StandardTextField
 import com.example.myfirstapp.ui.StandardNavigationAppBar
+import com.example.myfirstapp.ui.StandardTopAppBar
 import com.example.myfirstapp.ui.obtenerDocumentos
 import com.example.myfirstapp.ui.theme.MyFirstAppTheme
 import com.google.firebase.Timestamp
@@ -45,6 +46,7 @@ class RegistrarGastosActivity : ComponentActivity() {
     private val home = {startActivity(Intent(this, HomeActivity::class.java))}
     private val perfil = {startActivity(Intent(this, ProfileActivity::class.java))}
     private val presupuestos = {startActivity(Intent(this, PresupuestosActivity::class.java))}
+    private val graficos = {startActivity(Intent(this, GraficosActivity::class.java))}
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,11 +60,16 @@ class RegistrarGastosActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     Scaffold(
-                        bottomBar = { StandardNavigationAppBar(
-                            home=home,
-                            perfil = perfil,
-                            presupuestos = presupuestos
-                        )
+                        topBar = {
+                            StandardTopAppBar(onBackClick=home, title = "Registrar Gasto")
+                        },
+                        bottomBar = {
+                            StandardNavigationAppBar(
+                                home=home,
+                                perfil = perfil,
+                                presupuestos = presupuestos,
+                                graficos = graficos
+                            )
                         }
                     ) {
                         RegistroDeGasto()

@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardActionScope
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -45,6 +44,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import com.example.myfirstapp.ui.OutlinedTextFieldBackground
 import com.example.myfirstapp.ui.StandardNavigationAppBar
 import com.example.myfirstapp.ui.StandardTopAppBar
 import com.example.myfirstapp.ui.obtenerDocumentos
@@ -63,6 +63,7 @@ class HistorialGastosActivity : ComponentActivity() {
     private val perfil = {startActivity(Intent(this, ProfileActivity::class.java))}
     private val presupuestos = {startActivity(Intent(this, PresupuestosActivity::class.java))}
     private val historialGastos = {startActivity(Intent(this, HistorialGastosActivity::class.java))}
+    private val graficos = {startActivity(Intent(this, GraficosActivity::class.java))}
 
     private var filtroCategoria : String? = null
     private var filtroFuente : String? = null
@@ -91,12 +92,15 @@ class HistorialGastosActivity : ComponentActivity() {
                 ) {
                     Scaffold(
                         topBar = {
-                            StandardTopAppBar(onBackClick=home)
+                            StandardTopAppBar(onBackClick=home, title = "Historial de Gastos")
                         },
-                        bottomBar = { StandardNavigationAppBar(
-                            home=home,
-                            perfil = perfil,
-                            presupuestos = presupuestos )
+                        bottomBar = {
+                            StandardNavigationAppBar(
+                                home=home,
+                                perfil = perfil,
+                                presupuestos = presupuestos,
+                                graficos = graficos
+                            )
                         },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -149,7 +153,7 @@ class HistorialGastosActivity : ComponentActivity() {
                             gastoList.add("Precio: $$it")
                         }
                         document.getDate("date")?.let { date ->
-                            val formateoFecha = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+                            val formateoFecha = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                             val fecha = formateoFecha.format(date)
                             gastoList.add("Fecha: $fecha")
                         }
@@ -206,29 +210,30 @@ class HistorialGastosActivity : ComponentActivity() {
     private fun BarraBusqueda() {
         var busqueda:      String by remember {mutableStateOf("")}
 
-        OutlinedTextField(
-            value = busqueda,
-            onValueChange = { busqueda = it },
-            label = { Text("Buscar Titulo") },
-            modifier = Modifier.background(color = colorResource(id = R.color.white)),
-            trailingIcon = {
-                IconButton(
-                    onClick = { buscarTitulo(busqueda) }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Buscar",
-                        tint = Color.Gray
-                    )
-                }
-            },
-            keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Search // Define el tipo de acción del botón "Enter"
-            ),
-            keyboardActions = KeyboardActions(
-                onSearch = { buscarTitulo(busqueda) }
+        OutlinedTextFieldBackground(colorResource(id = R.color.white)) {
+            OutlinedTextField(
+                value = busqueda,
+                onValueChange = { busqueda = it },
+                label = { Text("Buscar Titulo") },
+                trailingIcon = {
+                    IconButton(
+                        onClick = { buscarTitulo(busqueda) }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Buscar",
+                            tint = Color.Gray
+                        )
+                    }
+                },
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Search // Define el tipo de acción del botón "Enter"
+                ),
+                keyboardActions = KeyboardActions(
+                    onSearch = { buscarTitulo(busqueda) }
+                )
             )
-        )
+        }
     }
 
     @Composable
@@ -404,12 +409,24 @@ class HistorialGastosActivity : ComponentActivity() {
     @Composable
     private fun ListarHistorial(gastos: MutableState<List<List<String>>>) {
         if (gastos.value.isEmpty()) {
-            Card(
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(30.dp)
+                    .background(color = colorResource(id = R.color.PrimaryColor))
             ) {
-                Text(text = "No hay gastos registrados")
+                Card(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(30.dp)
+                ) {
+                    Text(
+                        text = "No hay gastos registrados",
+                        modifier = Modifier
+                            .background(color = colorResource(id = R.color.PrimaryColor))
+                    )
+                }
             }
         } else {
             gastos.value.forEach { lista ->

@@ -2,9 +2,7 @@ package com.example.myfirstapp.ui
 
 
 import android.content.ContentValues
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -26,6 +24,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.outlined.Fastfood
 import androidx.compose.material.icons.outlined.Flight
@@ -36,10 +35,6 @@ import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material.icons.outlined.SportsEsports
 import androidx.compose.material3.ButtonDefaults.shape
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -58,6 +53,7 @@ import com.example.myfirstapp.R
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import me.saket.cascade.CascadeDropdownMenu
 
 val greenColor = Color(0xFF0F9D58)
 val blueColor = Color(0xFF2196F3)
@@ -68,31 +64,53 @@ val orangeColor = Color(0xFFFF8F00)
 val whiteColor = Color(0xFFFFFFFF)
 val coloresPieChart = listOf(greenColor,blueColor,yellowColor, redColor, orangeColor, pinkColor)
 
-@RequiresApi(Build.VERSION_CODES.M)
+@Composable
+fun OutlinedTextFieldBackground(
+    color: Color,
+    content: @Composable () -> Unit
+) {
+    // This box just wraps the background and the OutlinedTextField
+    Box {
+        // This box works as background
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .padding(top = 8.dp) // adding some space to the label
+                .background(
+                    color,
+                    // rounded corner to match with the OutlinedTextField
+                    shape = RoundedCornerShape(4.dp)
+                )
+        )
+        // OutlineTextField will be the content...
+        content()
+    }
+}
+
 @Composable
 fun StandardTextField(string: String, label: String, onValueChanged: (String) -> Unit, icon: ImageVector) {
-    OutlinedTextField(
-        value = string,
-        onValueChange = { newValue -> onValueChanged(newValue) },
-        label = { Text(label) },
-        leadingIcon = { Icon(imageVector = icon, contentDescription = null)} ,
-        modifier = Modifier
-            .background(color = colorResource(id = R.color.white))
-            .widthIn(min = 350.dp, max= 350.dp),
-        singleLine = true
-    )
+    OutlinedTextFieldBackground(colorResource(id = R.color.white)) {
+        OutlinedTextField(
+            value = string,
+            onValueChange = { newValue -> onValueChanged(newValue) },
+            label = { Text(label) },
+            leadingIcon = { Icon(imageVector = icon, contentDescription = null)}
+        )
+    }
+
 }
 
 @Composable
 fun StandardNumberField(string: String, label: String, onValueChanged: (String) -> Unit, icon: ImageVector) {
-    OutlinedTextField(
-        value = string,
-        onValueChange = { newValue -> onValueChanged(newValue) },
-        label = { Text(label) },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-        leadingIcon = { Icon(imageVector = icon, contentDescription = null)} ,
-        modifier = Modifier.background(color = colorResource(id = R.color.white))
-    )
+    OutlinedTextFieldBackground(colorResource(id = R.color.white)) {
+        OutlinedTextField(
+            value = string,
+            onValueChange = { newValue -> onValueChanged(newValue) },
+            label = { Text(label) },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            leadingIcon = { Icon(imageVector = icon, contentDescription = null)} ,
+        )
+    }
 }
 
 @Composable
@@ -149,19 +167,18 @@ fun ButtonPerfil(icon: ImageVector, label : String, onClick : () -> Unit) {
 @Composable
 //@Preview
 fun PasswordTextField(password: String, onValueChanged: (String) -> Unit) {
-
-    OutlinedTextField(
-        value = password,
-        onValueChange = { newValue -> onValueChanged(newValue) },
-        label = { Text("Password") },
-        visualTransformation = PasswordVisualTransformation(),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-        leadingIcon = { Icon(imageVector = Icons.Default.Lock, contentDescription = null) },
-        modifier = Modifier.background(color = colorResource(id = R.color.white))
-    )
+    OutlinedTextFieldBackground(colorResource(id = R.color.white)) {
+        OutlinedTextField(
+            value = password,
+            onValueChange = { newValue -> onValueChanged(newValue) },
+            label = { Text("Password") },
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            leadingIcon = { Icon(imageVector = Icons.Default.Lock, contentDescription = null) },
+        )
+    }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DropdownMenu(
     asuntoTextField: String,
@@ -174,42 +191,41 @@ fun DropdownMenu(
     var expanded by remember { mutableStateOf(false) }
 
     Column {
-
-            androidx.compose.material3.Text(
-                text = "Seleccionar $asuntoTextField",
-                modifier = Modifier.padding(vertical = 16.dp)
-            )
-
-        ExposedDropdownMenuBox(
-            expanded = expanded,
-            onExpandedChange = {
-                expanded = it
-            }
-        ) {
-            TextField(
+        OutlinedTextFieldBackground(colorResource(id = R.color.white)) {
+            OutlinedTextField(
                 value = selectedItem.value,
-                onValueChange = { },
-                readOnly = true,
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                modifier = Modifier.menuAnchor()
-                )
+                onValueChange = {},
+                trailingIcon = {
+                    IconButton(
+                        onClick = { expanded = true }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowDropDown,
+                            contentDescription = "Desplegar",
+                            tint = Color.Black
+                        )
+                    }
+                },
+                label = { Text(asuntoTextField) },
+                readOnly = true
+            )
+        }
 
-            ExposedDropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
-            ) {
-                opciones.forEach { item ->
-                    DropdownMenuItem(
-                        onClick = {
+        CascadeDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            opciones.forEach {item ->
+                DropdownMenuItem(
+                    onClick = {
                             selectedItem.value = item
                             expanded = false
                             onValueChanged(item)
                         },
-                        text = {
-                            androidx.compose.material3.Text(text = item)
-                        }
-                    )
-                }
+                    text = {
+                        androidx.compose.material3.Text(text = item)
+                    }
+                )
             }
         }
     }

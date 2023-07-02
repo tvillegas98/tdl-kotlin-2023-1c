@@ -41,6 +41,7 @@ class PersonalDataActivity : ComponentActivity() {
     private val home            = {startActivity(Intent(this, HomeActivity::class.java))}
     private val perfil          = {startActivity(Intent(this, ProfileActivity::class.java))}
     private val presupuestos    = {startActivity(Intent(this, PresupuestosActivity::class.java))}
+    private val graficos = {startActivity(Intent(this, GraficosActivity::class.java))}
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,9 +59,10 @@ class PersonalDataActivity : ComponentActivity() {
                         },
                         bottomBar = {
                             StandardNavigationAppBar(
-                                home            = home,
-                                perfil          = perfil,
-                                presupuestos    = presupuestos
+                                home=home,
+                                perfil = perfil,
+                                presupuestos = presupuestos,
+                                graficos = graficos
                             )
                         }
                     ) {
