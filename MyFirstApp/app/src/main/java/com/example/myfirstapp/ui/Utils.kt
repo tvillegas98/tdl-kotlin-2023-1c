@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
@@ -96,6 +97,7 @@ fun StandardTextField(string: String, label: String, onValueChanged: (String) ->
             leadingIcon = { Icon(imageVector = icon, contentDescription = null)}
         )
     }
+
 }
 
 @Composable
