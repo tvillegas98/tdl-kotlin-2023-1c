@@ -227,7 +227,7 @@ class PresupuestosActivity : ComponentActivity() {
                             val fechaPresupuesto = document.getString("creationDate")?.let {
                                 it.split("-")
                             }!!.map { it.toInt() }
-                            if (fechaMasReciente[YEAR] < fechaPresupuesto[YEAR] && fechaMasReciente[MONTH] < fechaPresupuesto[MONTH]) {
+                            if (fechaMasReciente[YEAR] <= fechaPresupuesto[YEAR] && fechaMasReciente[MONTH] <= fechaPresupuesto[MONTH]) {
                                 presupuestoMasReciente.value = document
                                 fechaMasReciente = fechaPresupuesto
                             }
