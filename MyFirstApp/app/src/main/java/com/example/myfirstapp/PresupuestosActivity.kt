@@ -61,6 +61,7 @@ import java.time.LocalDate
 
 const val YEAR = 0
 const val MONTH = 1
+const val DAY = 2
 
 class PresupuestosActivity : ComponentActivity() {
     private val home = {startActivity(Intent(this, HomeActivity::class.java))}
