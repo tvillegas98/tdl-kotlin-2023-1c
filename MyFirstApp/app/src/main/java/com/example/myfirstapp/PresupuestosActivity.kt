@@ -61,6 +61,7 @@ import java.time.LocalDate
 
 const val YEAR = 0
 const val MONTH = 1
+const val DAY = 2
 
 class PresupuestosActivity : ComponentActivity() {
     private val home = {startActivity(Intent(this, HomeActivity::class.java))}
@@ -226,7 +227,7 @@ class PresupuestosActivity : ComponentActivity() {
                             val fechaPresupuesto = document.getString("creationDate")?.let {
                                 it.split("-")
                             }!!.map { it.toInt() }
-                            if (fechaMasReciente[YEAR] < fechaPresupuesto[YEAR] && fechaMasReciente[MONTH] < fechaPresupuesto[MONTH]) {
+                            if (fechaMasReciente[YEAR] <= fechaPresupuesto[YEAR] && fechaMasReciente[MONTH] <= fechaPresupuesto[MONTH]) {
                                 presupuestoMasReciente.value = document
                                 fechaMasReciente = fechaPresupuesto
                             }
