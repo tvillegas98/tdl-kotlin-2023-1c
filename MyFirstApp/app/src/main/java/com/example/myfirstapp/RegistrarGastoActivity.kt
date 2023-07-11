@@ -217,11 +217,26 @@ class RegistrarGastosActivity : ComponentActivity() {
             .get()
             .addOnSuccessListener { documentReference ->
                 if(documentReference.documents.isNotEmpty()){
-                    val gastoDelPresupuesto = documentReference.documents[0]["spentAmount"].toString().toDouble()
+                    var presupuestoMasReciente = documentReference.documents[0]
+                    var fechaDelPresupuestoMasReciente = presupuestoMasReciente.getString("creationDate").let {
+                        it!!.split("-")
+                    }.map { it.toInt() }
+
+                    for(presupuesto in documentReference.documents){
+                        val fechaDelPresupuesto = presupuesto.getString("creationDate").let {
+                            it!!.split("-")
+                        }.map { it.toInt() }
+                        if(fechaDelPresupuestoMasReciente[YEAR] <= fechaDelPresupuesto[YEAR] &&
+                                    fechaDelPresupuestoMasReciente[MONTH] <= fechaDelPresupuesto[MONTH]
+                                ){
+                            presupuestoMasReciente = presupuesto
+                            fechaDelPresupuestoMasReciente = fechaDelPresupuesto
+                        }
+                    }
+                    val gastoDelPresupuesto = presupuestoMasReciente["spentAmount"].toString().toDouble()
                     val nuevoGastoDelPresupuesto = gastoDelPresupuesto + monto
-                    documentReference.documents[0]
-                        .reference
-                        .update("spentAmount", nuevoGastoDelPresupuesto)
+
+                    presupuestoMasReciente.reference.update("spentAmount", nuevoGastoDelPresupuesto)
                 }
             }
             .addOnFailureListener { e ->
